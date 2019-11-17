@@ -1,3 +1,5 @@
+Download from here : https://hhotatea.booth.pm/items/1668964
+
 # 説明
 
 VRChatでの特殊な状況でも望んだ動作をすることと、様々な表現を複数のシェーダーに分けず同じライティングで行うことを目指したトゥーンシェーダーです。
