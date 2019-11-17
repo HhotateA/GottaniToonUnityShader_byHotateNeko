@@ -7,6 +7,7 @@
 		_Noise_ST ("Noise_ST",vector) = (1,1,0,0)
 		_NoiseScroll ("Noise Scroll",vector) = (0,0,0,0)
 		_RandSeed ("Rand Seed",vector) = (134.5,510.91,566.7,7000)
+		_Clamp ("Clamp",vector) = (-1,1,0,1)
 	}
 	CGINCLUDE
 
@@ -27,6 +28,7 @@
 	int _NoiseMode;
 	float4 _Noise_ST;
 	float4 _NoiseScroll;
+	float4 _Clamp;
 
 	//
 	// Noise Shader Library for Unity - https://github.com/keijiro/NoiseShader
@@ -397,7 +399,7 @@
 	float4 noise_tex(float2 globalTexcoord){
 		float3 uv = float3(globalTexcoord * _Noise_ST.xy + _Noise_ST.zw, 0.0) + _NoiseScroll.xyz *floor(_Time.y/max(LIMIT_ZERO,_NoiseScroll.w))*max(LIMIT_ZERO,_NoiseScroll.w);
 		float4 output = _FBM ? fbm(uv) : outputnoise(uv);
-		return output;
+		return clamp(lerp(_Clamp.z,_Clamp.w,output),_Clamp.x,_Clamp.y);
 	}
 
 	float4 frag(v2f_customrendertexture i) : SV_Target{

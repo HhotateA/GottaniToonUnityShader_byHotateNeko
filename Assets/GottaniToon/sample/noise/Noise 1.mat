@@ -6,7 +6,7 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: Noise
+  m_Name: Noise 1
   m_Shader: {fileID: 4800000, guid: f2634eefd0d0e224f81d5ce98bb121bf, type: 3}
   m_ShaderKeywords: FBM Perlin SimpleNoise _FBM_ON
   m_LightmapFlags: 4
@@ -66,7 +66,7 @@ Material:
     - _Metallic: 0
     - _Mode: 0
     - _NOISE_GENERATE: 0
-    - _NoiseMode: 4
+    - _NoiseMode: 3
     - _Noisetype: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
@@ -79,10 +79,9 @@ Material:
     - _ZWrite: 1
     - _timescale: 1
     m_Colors:
-    - _Clamp: {r: -1, g: 1, b: 0, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _NoiseScroll: {r: 0.1, g: 0, b: 0.74, a: 0}
+    - _NoiseScroll: {r: 1, g: 0, b: 0.1, a: 0}
     - _Noise_ST: {r: 1, g: 1, b: 0, a: 0}
     - _RandSeed: {r: 134.5, g: 510.91, b: 566.7, a: 7000}
     - _scroll: {r: 0, g: 0, b: 1, a: 0}

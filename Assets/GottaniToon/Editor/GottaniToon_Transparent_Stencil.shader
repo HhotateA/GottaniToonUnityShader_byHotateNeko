@@ -1,4 +1,4 @@
-Shader "Hidden/HOTATE/GottaniToon_Transparent"
+Shader "Hidden/HOTATE/GottaniToon_Transparent_Stencil"
 {
 	Properties
 	{
@@ -255,8 +255,8 @@ Shader "Hidden/HOTATE/GottaniToon_Transparent"
 	
 SubShader
 	{
-		Tags {"Queue"="Transparent"}
-		GrabPass{"_GrabPassTexture_Transparent"}
+		Tags {"Queue"="Transparent+50"}
+		GrabPass{"_GrabPassTexture_TransparentStencil"}
 		Stencil
 		{
 			Ref [_Stencil]
@@ -790,9 +790,9 @@ SubShader
 					float4 grabUV = input.grabPos / input.grabPos.w;
 					float grabMosicFactor = max(LIMIT_ZERO,_GrabMosicFactor); //0除算の対策
 					grabUV = lerp( input.grabPos, float4( floor(grabUV.xy/grabMosicFactor)*grabMosicFactor + (grabMosicFactor/2).xx, grabUV.zw), step(LIMIT_ZERO,_GrabMosicFactor));
-					grabCol.r = tex2Dproj(_GrabPassTexture_Transparent, grabUV + _ChromaticAberrationR).r;
-					grabCol.g = tex2Dproj(_GrabPassTexture_Transparent, grabUV + _ChromaticAberrationG).g;
-					grabCol.b = tex2Dproj(_GrabPassTexture_Transparent, grabUV + _ChromaticAberrationB).b;
+					grabCol.r = tex2Dproj(_GrabPassTexture_TransparentStencil, grabUV + _ChromaticAberrationR).r;
+					grabCol.g = tex2Dproj(_GrabPassTexture_TransparentStencil, grabUV + _ChromaticAberrationG).g;
+					grabCol.b = tex2Dproj(_GrabPassTexture_TransparentStencil, grabUV + _ChromaticAberrationB).b;
 					float grabGray = (grabCol.r+grabCol.g+grabCol.b)/3;
 					grabCol = lerp( grabCol, floor(grabCol*_GrabColorStepFactor)/_GrabColorStepFactor , step(_GrabColorStepFactor,255));
 					float3 grabHSV = rgb2hsv(grabCol);
@@ -1393,7 +1393,7 @@ SubShader
 			float4 _ParallaxScroll;
 
 				//GrabPass
-				sampler2D_float _GrabPassTexture_Transparent;
+				sampler2D_float _GrabPassTexture_TransparentStencil;
 
 				int _Alpha2Grab;
 				float _GrabBlend;

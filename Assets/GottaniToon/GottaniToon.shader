@@ -41,7 +41,9 @@ Shader "HOTATE/GottaniToon"
 		_VertexColorMultiple ("Vertex Color Multiple", range(0,1)) = 0
 
 		[Header(Stereo Eye)] [HiddenInspector] _Dummy ("Dummy",int) = 0
-		_StereoEyeTexture ("Left Eye Texture", 2D) = "white" {}
+		[Toggle] _MirrorMode ("MirrorMode",float) = 0
+        [NoScaleOffset] _ReflectionTex0("Left Eye Texture", 2D) = "white" {}
+        [NoScaleOffset] _ReflectionTex1("Right Eye Texture", 2D) = "white" {}
 
 		[Header(HSV)] [HiddenInspector] _Dummy ("Dummy",int) = 0
 		_HSVMask ("HSV Mask", 2D) = "white" {}
@@ -72,7 +74,6 @@ Shader "HOTATE/GottaniToon"
         _ClipThreshold ("Clip Threshold", Range(0, 1)) = 0.3
 
 		[Header(Grab Tex)] [HiddenInspector] _Dummy ("Dummy",int) = 0
-		[Toggle(IS_GRAB_PASS)] _IS_GRAB_PASS ("IS Grab Pass",float) = 0
 		[Toggle] _Alpha2Grab ("Alpha to Grab", int) = 0
         _GrabBlend ("Grab Blend", Range(0, 1)) = 0
         _GrabMul ("Grab Multipl", Range(0, 1)) = 0
@@ -91,13 +92,17 @@ Shader "HOTATE/GottaniToon"
 		[Header(BackTexture)] [HiddenInspector] _Dummy ("Dummy",int) = 0
         [NoScaleOffset] _SubTex ("Sub Texture", 2D) = "white" {}
 		_SubColor ("Sub Color", color) = (1,1,1,1)
-        _Sub2BackTextureLevel ("Back Texture Level", Range(0, 1)) = 1
+        [NoScaleOffset] _BackTex ("Back Tex", 2D) = "white" {}
+        _Tex2BackTextureLevel ("Back Texture Level", Range(0, 1)) = 1
 
-		_Sub2ToonMap ("SubRTexture2AlphaMask", range(0,1)) = 0
-		_Sub2AlphaMask ("SubGTexture2AlphaMask", range(0,1)) = 0
+        [NoScaleOffset] _ToonMask ("Toon Mask", 2D) = "white" {}
+        _Toon ("Toon", range(0,1)) = 1
 
 		[Header(Disolve)] [HiddenInspector] _Dummy ("Dummy",int) = 0
 		_DisolveSpeed ("DisolveSpeed",range(0,10)) = 0
+        [NoScaleOffset] _DisolveMask ("Disolve Mask", 2D) = "white" {}
+		_Tex2AlphaMask ("SubGTexture2AlphaMask", range(0,1)) = 0
+        [NoScaleOffset] _AlphaMask ("Alpha Mask", 2D) = "white" {}
 
 		[Header(BumpMap)] [HiddenInspector] _Dummy ("Dummy",int) = 0
 		[NoScaleOffset] _BumpMap ("Normal", 2D) = "bump" {}
@@ -113,16 +118,16 @@ Shader "HOTATE/GottaniToon"
         _IndirectLightIntensity ("Indirect Light Intensity", Range(0, 1)) = 0.8
 		_MaxPointLightEfect ("Max PointLight Efect", range(0,1)) = 1
 
-        _Toon ("Toon", range(0,1)) = 1
-
         [Header(Toon)] [HiddenInspector] _Dummy ("Dummy",int) = 0
+		[NoScaleOffset]_ShadeColor ("Custom Shade Color", 2D) = "white" {}
         _ShadeColor0 ("1st Shade Color", Color) = (0.97, 0.81, 0.86, 1)
         _ShadeShift0 ("1st Shade Shift", Range(-1, 1)) = 0.173
         _ShadeToony0 ("1st Shade Toony", Range(0, 1)) = 0.383
         _ShadeColor1 ("2nd Shade Color", Color) = (0.9, 0.61, 0.68, 1)
         _ShadeShift1 ("2nd Shade Shift", Range(-1, 1)) = 0.288
         _ShadeToony1 ("2nd Shade Toony", Range(0, 1)) = 0.829
-        _Sub2ShadowTextureLevel ("Shadow Texture Level", Range(0, 1)) = 0
+        [NoScaleOffset] _ShadowTex ("Shadow Texture", 2D) = "white" {}
+        _Tex2ShadowTextureLevel ("Shadow Texture Level", Range(0, 1)) = 0
 
         [Header(Rim,Matcap)] [HiddenInspector] _Dummy ("Dummy",int) = 0
         _FresnelMask ("Mask", 2D) = "white" {}
@@ -175,6 +180,8 @@ Shader "HOTATE/GottaniToon"
 		_PositionMemory ("Position Memory", 2D) = "black" {}
 		_PositionPower ("Position Power", float) = 0
 		_PositionFactor ("Position Factor", Range(0, 1)) = 0
+		_ObjPosFactor ("ObjPos Factor", Range(0, 1)) = 1
+		_ObjPosNoise ("ObjPos Noise", Range(0, 10)) = 0
 		_MemoryScroll ("MemoryScroll",vector) = (0,0,0,0)
 		_Grabity ("Grabity",vector) = (0,0,0,0)
 		_ExtrusionFactor ("Extrusion Factor", Range(0, 1)) = 0
@@ -192,7 +199,7 @@ Shader "HOTATE/GottaniToon"
 		_ParticleSize ("Particle Size", range(0,1)) = 0.3
 
         [Header(Tesslation)] [HiddenInspector] _Dummy ("Dummy",int) = 0
-        //[NoScaleOffset] _TessMap ("TessMap", 2D) = "black" {}
+        [NoScaleOffset] _TessMap ("TessMap", 2D) = "white" {}
 		_TessFactor ("Tess Factor",Vector) = (1,1,1,1)
 
 		[Enum(OFF,0,ON,1)] _BloomZWrite ("BloomZWrite", float) = 0.0
@@ -234,7 +241,7 @@ Shader "HOTATE/GottaniToon"
 
 		[Header(Doppelganger)] [HiddenInspector] _Dummy ("Dummy",int) = 0
 		[Toggle(IS_DOPPELGENGER)] _IS_DOPPELGENGER ("DOPPELGENGER",float) = 0
-		[IntRange] _Doppelganger ("Doppelganger", range(1,8)) = 1
+		[IntRange] _Doppelganger ("Doppelganger", range(1,7)) = 1
 		_DoppelgangerPos ("Doppelganger Pos",vector) = (0,0,0,0)
 
 		[Header(RandFactor)] [HiddenInspector] _Dummy ("Dummy",int) = 0
@@ -295,13 +302,14 @@ SubShader
 				float3 worldTangent : WORLD_TANGENT;
 				float3 bitTangent : BIT_TANGENT;
 				float3 bary : TRIANGLE_BARY;
+                float4 refl : REFL_UV;
 			};
 
 			struct f_out{
 				fixed4 col : SV_TARGET;
 			};
 
-			[maxvertexcount(24)]
+			[maxvertexcount(21)]
 			void geom(triangle d2g input[3], inout TriangleStream<g2f> outStream)
 			{
 				cameraClip(_MirrorCulling);
@@ -319,8 +327,9 @@ SubShader
 				float3 extrusionVec = (polyNormal+_Grabity) * extrusionFactor;
 				
 				float2 particleUV = output.centerUV + _MemoryScroll.xy *floor(_Time.y/max(LIMIT_ZERO,_MemoryScroll.w))*max(LIMIT_ZERO,_MemoryScroll.w);
+				particleUV = TRANSFORM_TEX(particleUV,_PositionMemory);
 				float3 particlePos = (tex2Dlod(_PositionMemory,float4(particleUV,0,0)).xyz + noise_tex(particleUV)*_PositionNoise) * _PositionPower;
-				float4 wPos = mul(UNITY_MATRIX_M,float4(mPos+extrusionVec+particlePos,1));
+				float4 wPos = mul(UNITY_MATRIX_M,float4(mPos*_ObjPosFactor+extrusionVec+particlePos,1));
 				float4 vPos = mul(UNITY_MATRIX_V,wPos);
 
 				float3 localScale = float3(length(mul(UNITY_MATRIX_M,float4(1,0,0,0))),length(mul(UNITY_MATRIX_M,float4(0,1,0,0))),length(mul(UNITY_MATRIX_M,float4(0,0,1,0))));
@@ -339,6 +348,7 @@ SubShader
 						output.uv = input[i].uv;
 						output.color = input[i].color;
 						float2 memoryUV = lerp(output.centerUV, output.uv, _PositionFactor) + _MemoryScroll.xy *floor(_Time.y/max(LIMIT_ZERO,_MemoryScroll.w))*max(LIMIT_ZERO,_MemoryScroll.w); //メモリの解釈(ポリゴン単位か頂点単位か)
+						memoryUV = TRANSFORM_TEX(memoryUV,_PositionMemory);
 						float noise = random(memoryUV);
 						float distDepth = distance(mul(UNITY_MATRIX_M,input[i].pos),_WorldSpaceStereoCameraPos);
 						float3 outlineWidth = lerp(input[i].pos,input[i].normal,_OutlineBase)* tex2Dlod(_OutlineMask,float4(input[i].uv,0,0)).b * min(3,distDepth) * _OutlineWidth * 0.001;
@@ -351,7 +361,8 @@ SubShader
 						extrusionPos.xyz += mPos;
 						extrusionPos.xyz += extrusionVec + outlineWidth;
 						extrusionPos += _DoppelgangerPos * dop;
-						extrusionPos.xyz += tex2Dlod(_PositionMemory,float4(memoryUV,0,0)).xyz * _PositionPower;
+						float objPosFactor = saturate(_ObjPosFactor*(1+_ObjPosNoise) - noise*_ObjPosNoise);
+						extrusionPos.xyz = extrusionPos.xyz * objPosFactor + tex2Dlod(_PositionMemory,float4(memoryUV,0,0)).xyz * _PositionPower;
 						output.modelPos = extrusionPos.xyz;
 						output.worldPos = _Model2World ? forceRotMove(output.modelPos,_ModelRot,_ModelScale.xyz+localScale*_ModelScale.w,_ModelPos.xyz+localPos*_ModelPos.w)
 													: mul( UNITY_MATRIX_M, float4(forceRotMove(output.modelPos,_ModelRot,_ModelScale.xyz,float3(0,0,0)),1)).xyz + _ModelPos.xyz;
@@ -366,6 +377,7 @@ SubShader
 						output.worldTangent = normalize(UnityObjectToWorldDir(input[i].tangent));
 						output.bitTangent = normalize(cross(output.worldNormal, output.worldTangent) * input[i].tangent.w);
 						appdata_base v; v.vertex = float4(output.modelPos,1);
+                		output.refl = ComputeNonStereoScreenPos(output.pos);
 						UNITY_TRANSFER_FOG(output, output.pos);
 						TRANSFER_SHADOW(output);
 						output.bary = params[i];
@@ -381,10 +393,9 @@ SubShader
 				float2 mainUV = TRANSFORM_TEX(input.uv,_MainTex) + _UVScroll.xy*floor(_Time.y/max(LIMIT_ZERO,_UVScroll.w))*max(LIMIT_ZERO,_UVScroll.w); + _UVScroll.xy*floor(_Time.y/max(LIMIT_ZERO,_UVScroll.w))*max(LIMIT_ZERO,_UVScroll.w);
 				
 				// Sample Texture
-				fixed4 mainTex = tex2D(_MainTex, input.uv) * lerp(1,input.color,_VertexColorMultiple);
-				fixed4 subTex = tex2D(_SubTex, input.uv) * lerp(1,input.color,_VertexColorMultiple) * _SubColor;
+				fixed4 mainTex = tex2D(_MainTex, mainUV) * lerp(1,input.color,_VertexColorMultiple);
 
-				fixed4 texSample = maintexFactor(mainTex,subTex,mainUV,input.bary,facing,input.modelPos,input.worldPos);
+				fixed4 texSample = maintexFactor(mainTex,mainUV,input.bary,facing,input.modelPos,input.worldPos,input.refl);
 				fixed3 mainCol = texSample.rgb;
 				float mainAlpha = texSample.a;
 
@@ -411,7 +422,7 @@ SubShader
 				// float dotNH = max(0,dot(normalDir, HalfVector));
 				// float dotVH = max(0,dot(viewDir, HalfVector));
 				
-				float3 roughnessMetallicMap = tex2D(_RoughnessMetallicMap,mainUV).rgb;
+				float3 roughnessMetallicMap = UNITY_SAMPLE_TEX2D_SAMPLER(_RoughnessMetallicMap,_SubTex,mainUV).rgb;
 
 				float lightIntensity = dotNL;
 				lightIntensity = lightIntensity * 0.5 + 0.5; 
@@ -432,7 +443,7 @@ SubShader
 				indirectLighting = _VirtualGI<0 ? max( -_VirtualGI.xxx, indirectLighting) : lerp( _VirtualGI.xxx, indirectLighting, indirectLighting); // GIの最低値
 				indirectLighting = lerp( indirectLighting, max(indirectLighting.x, max(indirectLighting.y, indirectLighting.z)).xxx, saturate(_LightColorAttenuation)); // ColorAttenuation
 
-				fixed3 toonCol = calcToonCol( mainCol, subTex, 1-_Sub2ShadowTextureLevel,
+				fixed3 toonCol = calcToonCol( mainCol, mainUV, 1-_Tex2ShadowTextureLevel,
 											  _ShadeShift0, _ShadeToony0, _ShadeColor0,
 											  _ShadeShift1, _ShadeToony1, _ShadeColor1,
 											  lambert, lightColor, indirectLighting);
@@ -452,11 +463,12 @@ SubShader
 					float2 emiUV = TRANSFORM_TEX(mainUV, _EmissionTex);
 					emiUV += _EmissionScroll.xy *floor(_Time.y/max(LIMIT_ZERO,_EmissionScroll.w))*max(LIMIT_ZERO,_EmissionScroll.w);
 					emissionCol = tex2D(_EmissionTex, emiUV) * phase * _EmissionColor *50;
-					emissionCol *= tex2D(_EmissionMask,mainUV);
+					emissionCol *= UNITY_SAMPLE_TEX2D_SAMPLER(_EmissionMask,_SubTex,mainUV);
 				}
 
 				// Base + Light
-				mainCol = lerp(pbrCol,toonCol,_Toon*lerp(1,subTex.r,_Sub2ToonMap))+ emissionCol;
+				float toonMask = UNITY_SAMPLE_TEX2D_SAMPLER(_ToonMask,_SubTex,mainUV).r;
+				mainCol = lerp(pbrCol,toonCol,_Toon*toonMask)+ emissionCol;
 				mainAlpha = lerp(0,mainAlpha,step(_AlphaCut,mainAlpha));
 				
 				output.col.rgb = mainCol;
@@ -490,6 +502,7 @@ SubShader
 				}
 
 				output.col = lerp(output.col,particleCol,_ParticleFactor);
+				output.col *= UNITY_SAMPLE_TEX2D(_SubTex, input.uv) * _SubColor;
 				
 				return output;
 			}
@@ -507,7 +520,6 @@ SubShader
 			CGPROGRAM
 			#pragma target 5.0
 			#pragma shader_feature IS_DOPPELGENGER
-			#pragma shader_feature IS_GRAB_PASS
 			#pragma vertex vert
 			#pragma hull HS
 			#pragma domain DS
@@ -533,13 +545,14 @@ SubShader
 				float3 bitTangent : BIT_TANGENT;
 				float4 grabPos : GrabPos;
 				float3 bary : TRIANGLE_BARY;
+                float4 refl : REFL_UV;
 			};
 
 			struct f_out{
 				fixed4 col : SV_TARGET;
 			};
 
-			[maxvertexcount(24)]
+			[maxvertexcount(21)]
 			void geom(triangle d2g input[3], inout TriangleStream<g2f> outStream)
 			{
 				cameraClip(_MirrorCulling);
@@ -556,8 +569,9 @@ SubShader
 				float3 extrusionVec = (polyNormal+_Grabity) * extrusionFactor;
 				
 				float2 particleUV = output.centerUV + _MemoryScroll.xy *floor(_Time.y/max(LIMIT_ZERO,_MemoryScroll.w))*max(LIMIT_ZERO,_MemoryScroll.w);
+				particleUV = TRANSFORM_TEX(particleUV,_PositionMemory);
 				float3 particlePos = (tex2Dlod(_PositionMemory,float4(particleUV,0,0)).xyz + noise_tex(particleUV)*_PositionNoise) * _PositionPower;
-				float4 wPos = mul(UNITY_MATRIX_M,float4(mPos+extrusionVec+particlePos,1));
+				float4 wPos = mul(UNITY_MATRIX_M,float4(mPos*_ObjPosFactor+extrusionVec+particlePos,1));
 				float4 vPos = mul(UNITY_MATRIX_V,wPos);
 
 				float3 localScale = float3(length(mul(UNITY_MATRIX_M,float4(1,0,0,0))),length(mul(UNITY_MATRIX_M,float4(0,1,0,0))),length(mul(UNITY_MATRIX_M,float4(0,0,1,0))));
@@ -576,6 +590,7 @@ SubShader
 						output.uv = input[i].uv;
 						output.color = input[i].color;
 						float2 memoryUV = lerp(output.centerUV, output.uv, _PositionFactor) + _MemoryScroll.xy *floor(_Time.y/max(LIMIT_ZERO,_MemoryScroll.w))*max(LIMIT_ZERO,_MemoryScroll.w); //メモリの解釈(ポリゴン単位か頂点単位か)
+						memoryUV = TRANSFORM_TEX(memoryUV,_PositionMemory);
 						float noise = random(memoryUV);
 						float distDepth = distance(mul(UNITY_MATRIX_M,input[i].pos),_WorldSpaceStereoCameraPos);
 						float4 extrusionPos = float4(input[i].pos.xyz,1);
@@ -587,7 +602,8 @@ SubShader
 						extrusionPos.xyz += mPos;
 						extrusionPos.xyz += extrusionVec;
 						extrusionPos += _DoppelgangerPos * dop;
-						extrusionPos.xyz += tex2Dlod(_PositionMemory,float4(memoryUV,0,0)).xyz * _PositionPower;
+						float objPosFactor = saturate(_ObjPosFactor*(1+_ObjPosNoise) - noise*_ObjPosNoise);
+						extrusionPos.xyz = extrusionPos.xyz * objPosFactor + tex2Dlod(_PositionMemory,float4(memoryUV,0,0)).xyz * _PositionPower;
 						output.modelPos = extrusionPos.xyz;
 						output.worldPos = _Model2World ? forceRotMove(output.modelPos,_ModelRot,_ModelScale.xyz+localScale*_ModelScale.w,_ModelPos.xyz+localPos*_ModelPos.w)
 													: mul( UNITY_MATRIX_M, float4(forceRotMove(output.modelPos,_ModelRot,_ModelScale.xyz,float3(0,0,0)),1)).xyz + _ModelPos.xyz;
@@ -602,6 +618,7 @@ SubShader
 						output.worldTangent = normalize(UnityObjectToWorldDir(input[i].tangent));
 						output.bitTangent = normalize(cross(output.worldNormal, output.worldTangent) * input[i].tangent.w);
 						appdata_base v; v.vertex = float4(output.modelPos,1);
+                		output.refl = ComputeNonStereoScreenPos(output.pos);
 						UNITY_TRANSFER_FOG(output, output.pos);
 						TRANSFER_SHADOW(output);
 						float3 viewDir = normalize(output.worldPos - _WorldSpaceCameraPos.xyz);
@@ -622,10 +639,9 @@ SubShader
 				float2 mainUV = TRANSFORM_TEX(input.uv,_MainTex) + _UVScroll.xy*floor(_Time.y/max(LIMIT_ZERO,_UVScroll.w))*max(LIMIT_ZERO,_UVScroll.w); + _UVScroll.xy*floor(_Time.y/max(LIMIT_ZERO,_UVScroll.w))*max(LIMIT_ZERO,_UVScroll.w);
 				
 				// Sample Texture
-				fixed4 mainTex = tex2D(_MainTex, input.uv) * lerp(1,input.color,_VertexColorMultiple);
-				fixed4 subTex = tex2D(_SubTex, input.uv) * lerp(1,input.color,_VertexColorMultiple) * _SubColor;
+				fixed4 mainTex = tex2D(_MainTex, mainUV) * lerp(1,input.color,_VertexColorMultiple);
 
-				fixed4 texSample = maintexFactor(mainTex,subTex,mainUV,input.bary,facing,input.modelPos,input.worldPos);
+				fixed4 texSample = maintexFactor(mainTex,mainUV,input.bary,facing,input.modelPos,input.worldPos,input.refl);
 				fixed3 mainCol = texSample.rgb;
 				float mainAlpha = texSample.a;
 
@@ -648,7 +664,7 @@ SubShader
 				// float dotNH = max(0,dot(normalDir, HalfVector));
 				// float dotVH = max(0,dot(viewDir, HalfVector));
 
-				float3 roughnessMetallicMap = tex2D(_RoughnessMetallicMap,mainUV).rgb;
+				float3 roughnessMetallicMap = UNITY_SAMPLE_TEX2D_SAMPLER(_RoughnessMetallicMap,_SubTex,mainUV).rgb;
 				// Shadow
 				#ifdef IS_GRAB_PASS
 				float shadowAttenuation = 1.0;
@@ -675,7 +691,7 @@ SubShader
 				indirectLighting = _VirtualGI<0 ? max( -_VirtualGI.xxx, indirectLighting) : lerp( _VirtualGI.xxx, indirectLighting, indirectLighting); // GIの最低値
 				indirectLighting = lerp( indirectLighting, max(indirectLighting.x, max(indirectLighting.y, indirectLighting.z)).xxx, saturate(_LightColorAttenuation)); // ColorAttenuation
 
-				fixed3 toonCol = calcToonCol(mainCol, subTex, 1-_Sub2ShadowTextureLevel,
+				fixed3 toonCol = calcToonCol(mainCol, mainUV, 1-_Tex2ShadowTextureLevel,
 											 _ShadeShift0, _ShadeToony0, _ShadeColor0,
 											 _ShadeShift1, _ShadeToony1, _ShadeColor1,
 											 lambert, lightColor, indirectLighting);
@@ -689,14 +705,14 @@ SubShader
 				fixed3 matcapCol;
 				{
 					float2 matcapUV = float2(dot(worldViewRight, normalDir), dot(worldViewUp, normalDir)) * 0.5 + 0.5;
-					float matcapMask = tex2D(_FresnelMask,mainUV).g;
+					float matcapMask = UNITY_SAMPLE_TEX2D_SAMPLER(_FresnelMask,_SubTex,mainUV).g;
 					matcapCol = tex2D(_MatCap, matcapUV) * _MatCapColor * matcapMask;
 				}
 
 				fixed3 rimCol;
 				{
 					float rim = 1 - saturate(dotNV + _RimLift) * (1-_RimPower);
-					float rimMask = tex2D(_FresnelMask,mainUV),r;
+					float rimMask = UNITY_SAMPLE_TEX2D_SAMPLER(_FresnelMask,_SubTex,mainUV),r;
 					float3 reflDir = reflect(-viewDir, normalDir);
 					fixed4 fresnel = lerp(1,UNITY_SAMPLE_TEXCUBE_LOD(unity_SpecCube0, reflDir, 0),_RimFresnel);
 					rimCol = pow(rim,_RimFresnelPower) * rimMask * _RimColor * fresnel;
@@ -711,11 +727,12 @@ SubShader
 					float2 emiUV = TRANSFORM_TEX(mainUV, _EmissionTex);
 					emiUV += _EmissionScroll.xy *floor(_Time.y/max(LIMIT_ZERO,_EmissionScroll.w))*max(LIMIT_ZERO,_EmissionScroll.w);
 					emissionCol = tex2D(_EmissionTex, emiUV) * phase * _EmissionColor *50;
-					emissionCol *= tex2D(_EmissionMask,mainUV);
+					emissionCol *= UNITY_SAMPLE_TEX2D_SAMPLER(_EmissionMask,_SubTex,mainUV);
 				}
 
 				// Base + Light
-				mainCol = lerp(pbrCol,toonCol,_Toon*lerp(1,subTex.r,_Sub2ToonMap))+ emissionCol;
+				float toonMask = UNITY_SAMPLE_TEX2D_SAMPLER(_ToonMask,_SubTex,mainUV).r;
+				mainCol = lerp(pbrCol,toonCol,_Toon*toonMask) + emissionCol;
 				if(_MatcapMode<2) mainCol = lerp(mainCol+matcapCol,mainCol*matcapCol,_MatcapMode) + rimCol;
 				else mainCol =  mainCol + rimCol*matcapCol;
 				mainAlpha = lerp(0,mainAlpha,step(_AlphaCut,mainAlpha));
@@ -747,7 +764,7 @@ SubShader
 						parallaxCol = tex2D( _ParallaxTexture, parauv) * _ParallaxColor;
 						parallaxCol.a = lerp(0,parallaxCol.a,step(_AlphaCut,parallaxCol.a));
 						}
-						fixed4 mask = tex2D(_ParallaxMask,mainUV);
+						fixed4 mask = UNITY_SAMPLE_TEX2D_SAMPLER(_ParallaxMask,_SubTex,mainUV);
 						parallaxMask = 1-min(min(min(mask.r,mask.g),mask.b),mask.a);
 						parallaxMask *= step( LIMIT_ZERO, _ParallaxDepth);
 					}
@@ -767,27 +784,25 @@ SubShader
 					output.col.rgb = mainCol;
 					output.col.a = mainAlpha;
 
-				#ifdef IS_GRAB_PASS
-					fixed3 grabCol;
-					float grabAlpha;
-					{
-						float4 grabUV = input.grabPos / input.grabPos.w;
-						float grabMosicFactor = max(LIMIT_ZERO,_GrabMosicFactor); //0除算の対策
-						grabUV = lerp( input.grabPos, float4( floor(grabUV.xy/grabMosicFactor)*grabMosicFactor + (grabMosicFactor/2).xx, grabUV.zw), step(LIMIT_ZERO,_GrabMosicFactor));
-						grabCol.r = tex2Dproj(_GrabPassTexture, grabUV + _ChromaticAberrationR).r;
-						grabCol.g = tex2Dproj(_GrabPassTexture, grabUV + _ChromaticAberrationG).g;
-						grabCol.b = tex2Dproj(_GrabPassTexture, grabUV + _ChromaticAberrationB).b;
-						float grabGray = (grabCol.r+grabCol.g+grabCol.b)/3;
-						grabCol = lerp( grabCol, floor(grabCol*_GrabColorStepFactor)/_GrabColorStepFactor , step(_GrabColorStepFactor,255));
-						float3 grabHSV = rgb2hsv(grabCol);
-						grabHSV.x += _GrabH;
-						grabHSV.y = lerp( lerp(0,grabHSV.y,saturate(_GrabS*2)), lerp(grabHSV.y,1,saturate(_GrabS*2-1)), step(0.5,_GrabS));
-						grabHSV.z = lerp( lerp(0,grabHSV.z,saturate(_GrabV*2)), lerp(grabHSV.z,1,saturate(_GrabV*2-1)), step(0.5,_GrabV));
-						grabCol = hsv2rgb(grabHSV);
-					}
-					if(_Alpha2Grab) output.col = float4( lerp(output.col,grabCol,saturate(_GrabBlend+(1-output.col.a))) * lerp(1,grabCol,_GrabMul) + grabCol*_GrabAdd, 1);
-					else output.col = float4( lerp(output.col,grabCol,_GrabBlend) * lerp(1,grabCol,_GrabMul) + grabCol*_GrabAdd, output.col.a);
-				#endif
+				fixed3 grabCol;
+				float grabAlpha;
+				{
+					float4 grabUV = input.grabPos / input.grabPos.w;
+					float grabMosicFactor = max(LIMIT_ZERO,_GrabMosicFactor); //0除算の対策
+					grabUV = lerp( input.grabPos, float4( floor(grabUV.xy/grabMosicFactor)*grabMosicFactor + (grabMosicFactor/2).xx, grabUV.zw), step(LIMIT_ZERO,_GrabMosicFactor));
+					grabCol.r = tex2Dproj(_GrabPassTexture, grabUV + _ChromaticAberrationR).r;
+					grabCol.g = tex2Dproj(_GrabPassTexture, grabUV + _ChromaticAberrationG).g;
+					grabCol.b = tex2Dproj(_GrabPassTexture, grabUV + _ChromaticAberrationB).b;
+					float grabGray = (grabCol.r+grabCol.g+grabCol.b)/3;
+					grabCol = lerp( grabCol, floor(grabCol*_GrabColorStepFactor)/_GrabColorStepFactor , step(_GrabColorStepFactor,255));
+					float3 grabHSV = rgb2hsv(grabCol);
+					grabHSV.x += _GrabH;
+					grabHSV.y = lerp( lerp(0,grabHSV.y,saturate(_GrabS*2)), lerp(grabHSV.y,1,saturate(_GrabS*2-1)), step(0.5,_GrabS));
+					grabHSV.z = lerp( lerp(0,grabHSV.z,saturate(_GrabV*2)), lerp(grabHSV.z,1,saturate(_GrabV*2-1)), step(0.5,_GrabV));
+					grabCol = hsv2rgb(grabHSV);
+				}
+				if(_Alpha2Grab) output.col = float4( lerp(output.col,grabCol,saturate(_GrabBlend+(1-output.col.a))) * lerp(1,grabCol,_GrabMul) + grabCol*_GrabAdd, 1);
+				else output.col = float4( lerp(output.col,grabCol,_GrabBlend) * lerp(1,grabCol,_GrabMul) + grabCol*_GrabAdd, output.col.a);
 
 				// Alpha Cutout
 				clip(output.col.a-_AlphaCut);
@@ -808,6 +823,8 @@ SubShader
 				}
 
 				output.col = lerp(output.col,particleCol,_ParticleFactor);
+
+				output.col *= UNITY_SAMPLE_TEX2D(_SubTex, input.uv) * _SubColor;
 				
 				return output;
 			}
@@ -851,6 +868,7 @@ SubShader
 				float3 worldTangent : WORLD_TANGENT;
 				float3 bitTangent : BIT_TANGENT;
 				float3 bary : TRIANGLE_BARY;
+                float4 refl : REFL_UV;
 			};
 
 			struct f_out{
@@ -874,8 +892,9 @@ SubShader
 				float3 extrusionVec = (polyNormal+_Grabity) * extrusionFactor;
 				
 				float2 particleUV = output.centerUV + _MemoryScroll.xy *floor(_Time.y/max(LIMIT_ZERO,_MemoryScroll.w))*max(LIMIT_ZERO,_MemoryScroll.w);
+				particleUV = TRANSFORM_TEX(particleUV,_PositionMemory);
 				float3 particlePos = (tex2Dlod(_PositionMemory,float4(particleUV,0,0)).xyz + noise_tex(particleUV)*_PositionNoise) * _PositionPower;
-				float4 wPos = mul(UNITY_MATRIX_M,float4(mPos+extrusionVec+particlePos,1));
+				float4 wPos = mul(UNITY_MATRIX_M,float4(mPos*_ObjPosFactor+extrusionVec+particlePos,1));
 				float4 vPos = mul(UNITY_MATRIX_V,wPos);
 
 				float3 localScale = float3(length(mul(UNITY_MATRIX_M,float4(1,0,0,0))),length(mul(UNITY_MATRIX_M,float4(0,1,0,0))),length(mul(UNITY_MATRIX_M,float4(0,0,1,0))));
@@ -894,6 +913,7 @@ SubShader
 						output.uv = input[i].uv;
 						output.color = input[i].color;
 						float2 memoryUV = lerp(output.centerUV, output.uv, _PositionFactor) + _MemoryScroll.xy *floor(_Time.y/max(LIMIT_ZERO,_MemoryScroll.w))*max(LIMIT_ZERO,_MemoryScroll.w); //メモリの解釈(ポリゴン単位か頂点単位か)
+						memoryUV = TRANSFORM_TEX(memoryUV,_PositionMemory);
 						float noise = random(memoryUV);
 						float distDepth = distance(mul(UNITY_MATRIX_M,input[i].pos),_WorldSpaceStereoCameraPos);
 						float4 extrusionPos = float4(input[i].pos.xyz,1);
@@ -905,7 +925,8 @@ SubShader
 						extrusionPos.xyz += mPos;
 						extrusionPos.xyz += extrusionVec;
 						extrusionPos += _DoppelgangerPos * dop;
-						extrusionPos.xyz += tex2Dlod(_PositionMemory,float4(memoryUV,0,0)).xyz * _PositionPower;
+						float objPosFactor = saturate(_ObjPosFactor*(1+_ObjPosNoise) - noise*_ObjPosNoise);
+						extrusionPos.xyz = extrusionPos.xyz * objPosFactor + tex2Dlod(_PositionMemory,float4(memoryUV,0,0)).xyz * _PositionPower;
 						output.modelPos = extrusionPos.xyz;
 						output.worldPos = _Model2World ? forceRotMove(output.modelPos,_ModelRot,_ModelScale.xyz+localScale*_ModelScale.w,_ModelPos.xyz+localPos*_ModelPos.w)
 													: mul( UNITY_MATRIX_M, float4(forceRotMove(output.modelPos,_ModelRot,_ModelScale.xyz,float3(0,0,0)),1)).xyz + _ModelPos.xyz;
@@ -920,6 +941,7 @@ SubShader
 						output.worldTangent = normalize(UnityObjectToWorldDir(input[i].tangent));
 						output.bitTangent = normalize(cross(output.worldNormal, output.worldTangent) * input[i].tangent.w);
 						appdata_base v; v.vertex = float4(output.modelPos,1);
+                		output.refl = ComputeNonStereoScreenPos(output.pos);
 						UNITY_TRANSFER_FOG(output, output.pos);
 						TRANSFER_SHADOW(output);
 						output.bary = params[i];
@@ -935,10 +957,9 @@ SubShader
 				float2 mainUV = TRANSFORM_TEX(input.uv,_MainTex) + _UVScroll.xy*floor(_Time.y/max(LIMIT_ZERO,_UVScroll.w))*max(LIMIT_ZERO,_UVScroll.w); + _UVScroll.xy*floor(_Time.y/max(LIMIT_ZERO,_UVScroll.w))*max(LIMIT_ZERO,_UVScroll.w);
 				
 				// Sample Texture
-				fixed4 mainTex = tex2D(_MainTex, input.uv) * lerp(1,input.color,_VertexColorMultiple);
-				fixed4 subTex = tex2D(_SubTex, input.uv) * lerp(1,input.color,_VertexColorMultiple) * _SubColor;
+				fixed4 mainTex = tex2D(_MainTex, mainUV) * lerp(1,input.color,_VertexColorMultiple);
 
-				fixed4 texSample = maintexFactor(mainTex,subTex,mainUV,input.bary,facing,input.modelPos,input.worldPos);
+				fixed4 texSample = maintexFactor(mainTex,mainUV,input.bary,facing,input.modelPos,input.worldPos,input.refl);
 				fixed3 mainCol = texSample.rgb;
 				float mainAlpha = texSample.a;
 
@@ -961,7 +982,7 @@ SubShader
 				// float dotNH = max(0,dot(normalDir, HalfVector));
 				// float dotVH = max(0,dot(viewDir, HalfVector));
 
-				float3 roughnessMetallicMap = tex2D(_RoughnessMetallicMap,mainUV).rgb;
+				float3 roughnessMetallicMap = UNITY_SAMPLE_TEX2D_SAMPLER(_RoughnessMetallicMap,_SubTex,mainUV).rgb;
 				
 				float lightIntensity = dotNL;
 				//lightIntensity = lightIntensity * 0.5 + 0.5;
@@ -979,7 +1000,7 @@ SubShader
 				indirectLighting = _VirtualGI<0 ? max( -_VirtualGI.xxx, indirectLighting) : lerp( _VirtualGI.xxx, indirectLighting, indirectLighting); // GIの最低値
 				indirectLighting = lerp( indirectLighting, max(indirectLighting.x, max(indirectLighting.y, indirectLighting.z)).xxx, saturate(_LightColorAttenuation)); // ColorAttenuation
 
-				fixed3 toonCol = calcToonCol( mainCol, subTex, 1-_Sub2ShadowTextureLevel,
+				fixed3 toonCol = calcToonCol( mainCol, mainUV, 1-_Tex2ShadowTextureLevel,
 											  _ShadeShift0, _ShadeToony0, _ShadeColor0,
 											  _ShadeShift1, _ShadeToony1, _ShadeColor1,
 											  lambert, lightColor);
@@ -998,7 +1019,8 @@ SubShader
 				}
 
 				// Base + Light
-				mainCol = lerp(pbrCol,toonCol,_Toon*lerp(1,subTex.r,_Sub2ToonMap));
+				float toonMask = UNITY_SAMPLE_TEX2D_SAMPLER(_ToonMask,_SubTex,mainUV).r;
+				mainCol = lerp(pbrCol,toonCol,_Toon*toonMask);
 				mainAlpha = lerp(0,mainAlpha,step(_AlphaCut,mainAlpha));
 
 				output.col.rgb = mainCol * _MaxPointLightEfect;
@@ -1010,6 +1032,8 @@ SubShader
 
 				// apply fog
 				UNITY_APPLY_FOG(input.fogCoord, output);
+
+				output.col *= UNITY_SAMPLE_TEX2D(_SubTex, input.uv) * _SubColor;
 				
 				return output;
 			}
@@ -1073,6 +1097,7 @@ SubShader
 			}
 			
 			fixed4 frag (g2f i) : SV_Target{
+				float2 mainUV = TRANSFORM_TEX(i.uv,_MainTex) + _UVScroll.xy*floor(_Time.y/max(LIMIT_ZERO,_UVScroll.w))*max(LIMIT_ZERO,_UVScroll.w);
 				// Vector and scalar
 				float3 lightDir = length(_WorldSpaceLightPos0)<LIMIT_ZERO ? float3(0,1,0) : normalize(_WorldSpaceLightPos0.xyz);
 				fixed3 lightColor = _VirtualLight<0 ? max( -_VirtualLight.xxx, _LightColor0.rgb) : lerp( _VirtualLight.xxx, _LightColor0.rgb, _LightColor0.rgb); // VirtualLight
@@ -1090,13 +1115,14 @@ SubShader
 				col *= lerp(0.0,_BloomBrightness,saturate((length(col.rgb)-_BloomThreshold)/_BloomSoftknee)); //しきい値以下の色なら光らせない(干渉区間あり)
 				col *= gammacorrect( _BloomKnee, i.alpha); //なんかいい感じに(悲しいことに_kee=0はバグる)
 				col *= _BloomCol;
-				col.rgb *= lerp(normalize(float3(1,1,1)),normalize(tex2D(_MainTex,TRANSFORM_TEX(i.uv,_MainTex)).rgb),_BloomMainTexBlend);
+				col.rgb *= lerp(normalize(float3(1,1,1)),normalize(tex2D(_MainTex,mainUV).rgb),_BloomMainTexBlend);
 				// Alpha Cutout
 				clip(col.a-_AlphaCut);
-				float4 mask = tex2D(_BloomMask,TRANSFORM_TEX(i.uv,_MainTex));
+				float4 mask = tex2D(_BloomMask,mainUV);
 				clip(min(min(min(mask.r,mask.g),mask.b),mask.a) - LIMIT_ZERO);
 				col = lerp(col,saturate(col),_FurSaturate);
 				col.rgb *= lerp(1,saturate(lightColor+indirectLighting),_BloomLightEffect);
+				col *= UNITY_SAMPLE_TEX2D(_SubTex, i.uv) * _SubColor;
 				return col;
 			}
 			ENDCG
@@ -1128,13 +1154,14 @@ SubShader
 				float3 modelPos : MODEL_POS;
 				float3 worldPos : WORLD_POS;
 				float3 bary : TRIANGLE_BARY;
+                float4 refl : REFL_UV;
 			};
 
 			struct f_out{
 				fixed4 col : SV_TARGET;
 			};
 
-			[maxvertexcount(24)]
+			[maxvertexcount(21)]
 			void geom(triangle d2g input[3], inout TriangleStream<g2f> outStream)
 			{
 				cameraClip(_MirrorCulling);
@@ -1151,8 +1178,9 @@ SubShader
 				float3 extrusionVec = (polyNormal+_Grabity) * extrusionFactor;
 				
 				float2 particleUV = output.centerUV + _MemoryScroll.xy *floor(_Time.y/max(LIMIT_ZERO,_MemoryScroll.w))*max(LIMIT_ZERO,_MemoryScroll.w);
+				particleUV = TRANSFORM_TEX(particleUV,_PositionMemory);
 				float3 particlePos = (tex2Dlod(_PositionMemory,float4(particleUV,0,0)).xyz + noise_tex(particleUV)*_PositionNoise) * _PositionPower;
-				float4 wPos = mul(UNITY_MATRIX_M,float4(mPos+extrusionVec+particlePos,1));
+				float4 wPos = mul(UNITY_MATRIX_M,float4(mPos*_ObjPosFactor+extrusionVec+particlePos,1));
 				float4 vPos = mul(UNITY_MATRIX_V,wPos);
 
 				float3 localScale = float3(length(mul(UNITY_MATRIX_M,float4(1,0,0,0))),length(mul(UNITY_MATRIX_M,float4(0,1,0,0))),length(mul(UNITY_MATRIX_M,float4(0,0,1,0))));
@@ -1161,53 +1189,65 @@ SubShader
 				float3 cameraSpaceCameraPos = float3(-_WorldSpaceCameraPos.x,-_WorldSpaceCameraPos.y,_WorldSpaceCameraPos.z);
 				
 
-				[unroll] for(int i=0;i<3;i++)
+				int dop=0;
+				#ifdef IS_DOPPELGENGER
+				for(;dop<_Doppelganger;dop++){
+				#else
 				{
-					output.uv = input[i].uv;
-					output.color = input[i].color;
-					float2 memoryUV = lerp(output.centerUV, output.uv, _PositionFactor) + _MemoryScroll.xy *floor(_Time.y/max(LIMIT_ZERO,_MemoryScroll.w))*max(LIMIT_ZERO,_MemoryScroll.w); //メモリの解釈(ポリゴン単位か頂点単位か)
-					float noise = random(memoryUV);
-					float distDepth = distance(mul(UNITY_MATRIX_M,input[i].pos),_WorldSpaceStereoCameraPos);
-					float4 extrusionPos = float4(input[i].pos.xyz,1);
-					extrusionPos.xyz -= mPos;
-					float rotationFactor = saturate(_RotationFactor*(1+_RotationNoise) - noise*_RotationNoise);
-					extrusionPos = rotation(rotAxi, rotationFactor*180, extrusionPos); // 視線と法線に垂直な軸で回転
-					float scaleFactor = saturate(_ScaleFactor*(1+_ScaleNoise) - noise*_ScaleNoise);
-					extrusionPos.xyz = lerp(float3(0,0,0), extrusionPos.xyz, scaleFactor); //ポリゴンベースのスケールファクタ
-					extrusionPos.xyz += mPos;
-					extrusionPos.xyz += extrusionVec;
-					extrusionPos.xyz += tex2Dlod(_PositionMemory,float4(memoryUV,0,0)).xyz * _PositionPower;
-					output.modelPos = extrusionPos.xyz;
-					output.worldPos = _Model2World ? forceRotMove(output.modelPos,_ModelRot,_ModelScale.xyz+localScale*_ModelScale.w,_ModelPos.xyz+localPos*_ModelPos.w)
-												   : mul( UNITY_MATRIX_M, float4(forceRotMove(output.modelPos,_ModelRot,_ModelScale.xyz,float3(0,0,0)),1)).xyz + _ModelPos.xyz;
-					float3 viewPos = _World2View ? forceRotMove(output.worldPos,_CameraRot,_CameraScale,_CameraPos.xyz+cameraSpaceCameraPos*_CameraPos.w)
-												 : mul(UNITY_MATRIX_V,float4(output.worldPos,1)).xyz;
-					float4 clipPos = mul(UNITY_MATRIX_P,float4(viewPos,1)); //通常のポジション
-					float4 partPos = mul(UNITY_MATRIX_P,vPos+float4(particles[i]*_ParticleSize,0,0)); //パーティクル化したポジション
-					float4 billbordPos = float4(localViewPos + forceRotMove(output.modelPos,_BillBoardPos,_BillBoardScale.xyz,_BillBoardPos.xyz),1); //ビルボード化したポジション
-					output.pos = _BillBoard ? mul(UNITY_MATRIX_P,billbordPos) : lerp(clipPos,partPos,_ParticleFactor);
-					output.pos = UnityApplyLinearShadowBias(output.pos);
-					output.bary = params[i];
-					outStream.Append(output);
+				#endif
+					[unroll] for(int i=0;i<3;i++)
+					{
+						output.uv = input[i].uv;
+						output.color = input[i].color;
+						float2 memoryUV = lerp(output.centerUV, output.uv, _PositionFactor) + _MemoryScroll.xy *floor(_Time.y/max(LIMIT_ZERO,_MemoryScroll.w))*max(LIMIT_ZERO,_MemoryScroll.w); //メモリの解釈(ポリゴン単位か頂点単位か)
+						memoryUV = TRANSFORM_TEX(memoryUV,_PositionMemory);
+						float noise = random(memoryUV);
+						float distDepth = distance(mul(UNITY_MATRIX_M,input[i].pos),_WorldSpaceStereoCameraPos);
+						float4 extrusionPos = float4(input[i].pos.xyz,1);
+						extrusionPos.xyz -= mPos;
+						float rotationFactor = saturate(_RotationFactor*(1+_RotationNoise) - noise*_RotationNoise);
+						extrusionPos = rotation(rotAxi, rotationFactor*180, extrusionPos); // 視線と法線に垂直な軸で回転
+						float scaleFactor = saturate(_ScaleFactor*(1+_ScaleNoise) - noise*_ScaleNoise);
+						extrusionPos.xyz = lerp(float3(0,0,0), extrusionPos.xyz, scaleFactor); //ポリゴンベースのスケールファクタ
+						extrusionPos.xyz += mPos;
+						extrusionPos.xyz += extrusionVec;
+						extrusionPos += _DoppelgangerPos * dop;
+						float objPosFactor = saturate(_ObjPosFactor*(1+_ObjPosNoise) - noise*_ObjPosNoise);
+						extrusionPos.xyz = extrusionPos.xyz * objPosFactor + tex2Dlod(_PositionMemory,float4(memoryUV,0,0)).xyz * _PositionPower;
+						output.modelPos = extrusionPos.xyz;
+						output.worldPos = _Model2World ? forceRotMove(output.modelPos,_ModelRot,_ModelScale.xyz+localScale*_ModelScale.w,_ModelPos.xyz+localPos*_ModelPos.w)
+													: mul( UNITY_MATRIX_M, float4(forceRotMove(output.modelPos,_ModelRot,_ModelScale.xyz,float3(0,0,0)),1)).xyz + _ModelPos.xyz;
+						float3 viewPos = _World2View ? forceRotMove(output.worldPos,_CameraRot,_CameraScale,_CameraPos.xyz+cameraSpaceCameraPos*_CameraPos.w)
+													: mul(UNITY_MATRIX_V,float4(output.worldPos,1)).xyz;
+						float4 clipPos = mul(UNITY_MATRIX_P,float4(viewPos,1)); //通常のポジション
+						float4 partPos = mul(UNITY_MATRIX_P,vPos+float4(particles[i]*_ParticleSize,0,0)); //パーティクル化したポジション
+						float4 billbordPos = float4(localViewPos + forceRotMove(output.modelPos,_BillBoardPos,_BillBoardScale.xyz,_BillBoardPos.xyz),1); //ビルボード化したポジション
+						output.pos = _BillBoard ? mul(UNITY_MATRIX_P,billbordPos) : lerp(clipPos,partPos,_ParticleFactor);
+						output.pos = UnityApplyLinearShadowBias(output.pos);
+						output.bary = params[i];
+						output.refl = ComputeNonStereoScreenPos(output.pos);
+						outStream.Append(output);
+					}
+					outStream.RestartStrip();
 				}
-				outStream.RestartStrip();
 			}
 			
 			f_out frag (g2f input, fixed facing : VFACE)
 			{
 				f_out output;
 				float2 mainUV = TRANSFORM_TEX(input.uv,_MainTex) + _UVScroll.xy*floor(_Time.y/max(LIMIT_ZERO,_UVScroll.w))*max(LIMIT_ZERO,_UVScroll.w);
-				float shadowMask = tex2D(_RoughnessMetallicMap,mainUV).b;
+				float shadowMask = UNITY_SAMPLE_TEX2D_SAMPLER(_RoughnessMetallicMap,_SubTex,mainUV).b;
 				clip(shadowMask-_AlphaCut);
 
 				// Sample Texture
-				fixed4 mainTex = tex2D(_MainTex, input.uv) * lerp(1,input.color,_VertexColorMultiple);
-				fixed4 subTex = tex2D(_SubTex, input.uv) * lerp(1,input.color,_VertexColorMultiple) * _SubColor;
+				fixed4 mainTex = tex2D(_MainTex, mainUV) * lerp(1,input.color,_VertexColorMultiple);
 
-				output.col = maintexFactor(mainTex,subTex,mainUV,input.bary,facing,input.modelPos,input.worldPos);
+				output.col = maintexFactor(mainTex,mainUV,input.bary,facing,input.modelPos,input.worldPos,input.refl);
 
 				output.col.a *=  (1-_ParticleFactor);
 				clip(output.col.a-_AlphaCut);
+
+				output.col *= UNITY_SAMPLE_TEX2D(_SubTex, input.uv) * _SubColor;
 				
 				return output;
 			}
@@ -1222,8 +1262,7 @@ SubShader
 			float _DstBlend;
 			float _Toon;
 			float _AlphaCut;
-			float _Sub2ToonMap;
-			float _Sub2AlphaMask;
+			float _Tex2AlphaMask;
 
 			float _MirrorCulling;
 			float _CameraCulling;
@@ -1238,23 +1277,33 @@ SubShader
 
 			sampler2D _MainTex; float4 _MainTex_ST;
 			fixed4 _Color;
-			sampler2D _StereoEyeTexture; float4 _StereoEyeTexture_ST;
+			int _MirrorMode;
+			UNITY_DECLARE_TEX2D(_ReflectionTex0);
+			UNITY_DECLARE_TEX2D_NOSAMPLER(_ReflectionTex1);
+
 			float _VertexColorMultiple;
 			float4 _UVScroll;
 
-			sampler2D _SubTex;
+			UNITY_DECLARE_TEX2D(_SubTex);
+			UNITY_DECLARE_TEX2D_NOSAMPLER(_BackTex);
+			UNITY_DECLARE_TEX2D_NOSAMPLER(_AlphaMask);
+			UNITY_DECLARE_TEX2D_NOSAMPLER(_DisolveMask);
+			UNITY_DECLARE_TEX2D_NOSAMPLER(_ShadowTex);
+			UNITY_DECLARE_TEX2D_NOSAMPLER(_ToonMask);
 			fixed4 _SubColor;
-			float _Sub2BackTextureLevel;
+			float _Tex2BackTextureLevel;
 
 			float _DisolveSpeed;
 
+			sampler2D _ShadeColor;
+
 			fixed4 _ShadeColor0;
 			fixed4 _ShadeColor1;
-			float _Sub2ShadowTextureLevel;
+			float _Tex2ShadowTextureLevel;
 
 			fixed4 _ExchangeColor;
 			float _ExchangeThreshold;
-			sampler2D _HSVMask;
+			UNITY_DECLARE_TEX2D_NOSAMPLER(_HSVMask);
 			int _HSVPosMask;
 			float _H, _S, _V;
 			float _ColorStepFactor;
@@ -1296,7 +1345,7 @@ SubShader
 			float _ShadeToony1;
 
 			//Mask
-			sampler2D _FresnelMask;
+			UNITY_DECLARE_TEX2D_NOSAMPLER(_FresnelMask);
 			// Rim
 			float4 _RimColor;
 			float _RimPower;
@@ -1309,13 +1358,13 @@ SubShader
 			int _MatcapMode;
 			
 			// Diffuse
-			sampler2D _RoughnessMetallicMap;
+			UNITY_DECLARE_TEX2D_NOSAMPLER(_RoughnessMetallicMap);
 			float _Metalic;
 			float _Roughness;
 
 			// Emission
 			sampler2D _EmissionTex; float4 _EmissionTex_ST;
-			sampler2D _EmissionMask;
+			UNITY_DECLARE_TEX2D_NOSAMPLER(_EmissionMask);
 			fixed4 _EmissionColor;
 			float4 _EmissionScroll;
 			float4 _EmissionVelocity;
@@ -1335,7 +1384,7 @@ SubShader
 			//ParallaxMapping
 			int _Alpha2Parallax;
 			sampler2D _ParallaxTexture; float4 _ParallaxTexture_ST;
-			sampler2D _ParallaxMask;
+			UNITY_DECLARE_TEX2D_NOSAMPLER(_ParallaxMask);
 			float4 _ParallaxColor;
 			float _ParallaxDepth;
 			float _ParallaxBlend;
@@ -1343,10 +1392,9 @@ SubShader
 			float _ParallaxAdd;
 			float4 _ParallaxScroll;
 
-			#ifdef IS_GRAB_PASS
 				//GrabPass
 				sampler2D_float _GrabPassTexture;
-			#endif
+
 				int _Alpha2Grab;
 				float _GrabBlend;
 				float _GrabMul;
@@ -1362,9 +1410,12 @@ SubShader
 
 			// Geometry
 			sampler2D_float _PositionMemory;
+			float4 _PositionMemory_ST;
 			float _PositionNoise;
 			float _PositionFactor;
 			float _PositionPower;
+			float _ObjPosFactor;
+			float _ObjPosNoise;
 			float4 _MemoryScroll;
 			float4 _Grabity;
 			float _ExtrusionFactor;
@@ -1438,7 +1489,7 @@ SubShader
 							float3 lightDir = _WorldSpaceLightPos0.xyz - a.worldPos.xyz;\
 							float dotNL = max(0,dot(normalDir,lightDir));\
 							float dotNV = max(0,dot(normalDir,viewDir));\
-							float3 roughnessMetallicMap = tex2D(_RoughnessMetallicMap,mainUV).rgb;\
+							float3 roughnessMetallicMap = UNITY_SAMPLE_TEX2D_SAMPLER(_RoughnessMetallicMap,_SubTex,mainUV).rgb;\
 							float lightIntensity = dotNL;\
 							float lambert = lerp(lightIntensity,lightIntensity * 2.0 - 1.0, 0);\
 							UNITY_LIGHT_ATTENUATION(shadowAttenuation, a, a.worldPos.xyz);\
@@ -1542,7 +1593,7 @@ SubShader
 		#define OUTPUT_PATCH_SIZE 3
 		
 		//Tessalation
-		//sampler2D _TessMap;
+		sampler2D _TessMap;
 		float4 _TessFactor;
 			
 		struct v2h
@@ -1629,18 +1680,18 @@ SubShader
 		h2d_const HSConst(InputPatch<v2h,INPUT_PATCH_SIZE> input)
 		{
 			h2d_const output;
-			/*
+			
 			float4 uv = float4((input[0].uv+ input[1].uv + input[2].uv) / 3., 0, 0);
-			float tessWeight = tex2Dlod(_TessMap,uv).r;
-			output.tess_factor[0] = lerp( 1, _TessFactor.x, tessWeight);
-			output.tess_factor[1] = lerp( 1, _TessFactor.y, tessWeight);
-			output.tess_factor[2] = lerp( 1, _TessFactor.z, tessWeight);
-			output.InsideTessFactor = lerp( 1, _TessFactor.w, tessWeight);
-			*/
-			output.tess_factor[0] = _TessFactor.x;
-			output.tess_factor[1] = _TessFactor.y;
-			output.tess_factor[2] = _TessFactor.z;
-			output.InsideTessFactor = _TessFactor.w;
+			float4 tessWeight = tex2Dlod(_TessMap,uv);
+			output.tess_factor[0] = lerp( 1, _TessFactor.x, tessWeight.r);
+			output.tess_factor[1] = lerp( 1, _TessFactor.y, tessWeight.g);
+			output.tess_factor[2] = lerp( 1, _TessFactor.z, tessWeight.b);
+			output.InsideTessFactor = lerp( 1, _TessFactor.w, tessWeight.a);
+			
+			// output.tess_factor[0] = _TessFactor.x;
+			// output.tess_factor[1] = _TessFactor.y;
+			// output.tess_factor[2] = _TessFactor.z;
+			// output.InsideTessFactor = _TessFactor.w;
 			return output;
 		}
 
@@ -1672,23 +1723,21 @@ SubShader
 			return output;
 		}
 
-		inline fixed4 maintexFactor(fixed4 mainTex, fixed4 subTex,float2 uv, float3 bary, fixed facing, float3 modelPos, float3 worldPos)
+		inline fixed4 maintexFactor(fixed4 mainTex, float2 uv, float3 bary, fixed facing, float3 modelPos, float3 worldPos, float4 mirrorUV)
 		{
-			
 			// facing
-			mainTex = facing>0 ? mainTex : lerp(mainTex,subTex,_Sub2BackTextureLevel);
+			fixed4 backTex = UNITY_SAMPLE_TEX2D_SAMPLER(_BackTex,_SubTex,uv);
+			mainTex = facing>0 ? mainTex : lerp(mainTex,backTex,_Tex2BackTextureLevel);
 
 			// Stereo TExture
-			float2 stereoUV = TRANSFORM_TEX(uv,_StereoEyeTexture);
-			stereoUV.x *= 0.5;
-			if (unity_StereoEyeIndex > 0.5) stereoUV.x += 0.5;
-			mainTex *= tex2D(_StereoEyeTexture,stereoUV);
+			float2 stereoUV = lerp(uv,mirrorUV,_MirrorMode);
+			mainTex *= unity_StereoEyeIndex == 0 ? UNITY_SAMPLE_TEX2D_SAMPLER(_ReflectionTex0, _ReflectionTex0, stereoUV) : UNITY_SAMPLE_TEX2D_SAMPLER(_ReflectionTex1, _ReflectionTex0, stereoUV);
 
 			fixed3 mainCol = mainTex.rgb;
 			float mainAlpha = mainTex.a;
 
 			//MaintexFactor
-			float exchangeMask = tex2D(_HSVMask,uv);
+			float exchangeMask = UNITY_SAMPLE_TEX2D_SAMPLER(_HSVMask,_SubTex,uv);
 			exchangeMask = (_HSVPosMask == 1 && modelPos.x<0) ? 0 : exchangeMask;
 			exchangeMask = (_HSVPosMask == 2 && modelPos.x>0) ? 0 : exchangeMask;
 			float3 hsv = rgb2hsv(mainCol);
@@ -1702,10 +1751,12 @@ SubShader
 			// Multipul Color
 			mainCol *= _Color.rgb;
 			mainAlpha *= _Color.a;
-			
-			mainAlpha = lerp(mainAlpha,subTex.g,_Sub2AlphaMask);
+
+			float alphaMask = UNITY_SAMPLE_TEX2D_SAMPLER(_AlphaMask,_SubTex,uv).r;	
+			mainAlpha = lerp(mainAlpha,alphaMask,_Tex2AlphaMask);
+			float disolve = UNITY_SAMPLE_TEX2D_SAMPLER(_DisolveMask,_SubTex,uv).r;
 			float disolveAlpha = saturate(frac(_Time.y*_DisolveSpeed/2)*2);
-			mainAlpha = lerp( mainAlpha, (saturate(frac(_Time.y*_DisolveSpeed/2)*2-1)), step(disolveAlpha,subTex.b)*step(LIMIT_ZERO,_DisolveSpeed));
+			mainAlpha = lerp( mainAlpha, (saturate(frac(_Time.y*_DisolveSpeed/2)*2-1)), step(disolveAlpha,disolve)*step(LIMIT_ZERO,_DisolveSpeed));
 
 			// Wireframe
 			float wireframeWidth = (_WireframeWidth+1) * step(LIMIT_ZERO,_WireframeWidth);
@@ -1737,7 +1788,7 @@ SubShader
 			return fixed4(mainCol,mainAlpha);
 		}
 
-		inline fixed3 calcToonCol(fixed3 mainCol, fixed3 subTex, float shadowTextureLevel,
+		inline fixed3 calcToonCol(fixed3 mainCol, float2 uv, float shadowTextureLevel,
 								  float shadeShift0, float shadeToony0, fixed4 shadeColor0,
 								  float shadeShift1, float shadeToony1, fixed4 shadeColor1,
 								  float lambert, fixed3 lightColor, fixed3 indirectLighting)
@@ -1752,10 +1803,12 @@ SubShader
 
 			// Albedo color
 			fixed3 lit =  mainCol;
-			fixed3 shadow = lerp( subTex, mainCol, shadowTextureLevel);
+			fixed4 shadowTex = UNITY_SAMPLE_TEX2D_SAMPLER(_ShadowTex,_SubTex,uv).r;
+			fixed3 shadow = lerp( shadowTex, mainCol, shadowTextureLevel);
 			fixed3 shade0 = shadow * shadeColor0;
 			fixed3 shade1 = shadow * shadeColor1;
 			fixed3 col = lerp(lerp(shade1, shade0, lightIntensity1), lit, lightIntensity0);
+			col *= tex2D(_ShadeColor,float2(lambert,0.5));
 
 			//lighting
 			col.rgb *= lightColor;
@@ -1767,12 +1820,12 @@ SubShader
 			
 			return col;
 		}
-		inline fixed3 calcToonCol(fixed3 mainCol, fixed3 subTex, float shadowTextureLevel,
+		inline fixed3 calcToonCol(fixed3 mainCol, float2 uv, float shadowTextureLevel,
 								  float shadeShift0, float shadeToony0, fixed4 shadeColor0,
 								  float shadeShift1, float shadeToony1, fixed4 shadeColor1,
 								  float lambert, fixed3 lightColor)
 		{
-			return calcToonCol(mainCol,subTex,shadowTextureLevel,shadeShift0,shadeToony0,shadeColor0,shadeShift1,shadeToony1,shadeColor1,lambert,lightColor,fixed3(0,0,0));
+			return calcToonCol(mainCol,uv,shadowTextureLevel,shadeShift0,shadeToony0,shadeColor0,shadeShift1,shadeToony1,shadeColor1,lambert,lightColor,fixed3(0,0,0));
 		}
 
 		inline fixed3 calcPBRCol(fixed3 mainCol,

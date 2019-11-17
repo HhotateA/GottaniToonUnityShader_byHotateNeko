@@ -6,6 +6,7 @@ using System.Linq;
 using System.IO;
 using System.Collections.Generic;
 public class GottaniEditor : ShaderGUI {
+    private static bool AutoShaderChange = true;
 	private static string[] LayerLabels = new string[3]{"Label0","Label1","Label2"};
     public enum BlendMode {
         Opaque,                 // 不透明
@@ -88,7 +89,9 @@ public class GottaniEditor : ShaderGUI {
     MaterialProperty pColor;
     MaterialProperty pVertexColorMultiple;
 
-    MaterialProperty pStereoEyeTexture;
+    MaterialProperty pMirrorMode;
+    MaterialProperty pReflectionTex0;
+    MaterialProperty pReflectionTex1;
     
     MaterialProperty pHSVMask;
     MaterialProperty pHSVPosMask;
@@ -112,7 +115,6 @@ public class GottaniEditor : ShaderGUI {
     MaterialProperty pFarClip;
     MaterialProperty pClipThreshold;
 
-    MaterialProperty pIS_GRAB_PASS;
     MaterialProperty pAlpha2Grab;
     MaterialProperty pGrabBlend;
     MaterialProperty pGrabMul;
@@ -132,9 +134,12 @@ public class GottaniEditor : ShaderGUI {
 
     MaterialProperty pSubTex;
     MaterialProperty pSubColor;
-    MaterialProperty pBackTextureLevel;
-    MaterialProperty pToonMap;
+    MaterialProperty pBackTex;
     MaterialProperty pAlphaMask;
+    MaterialProperty pDisolveMask;
+    MaterialProperty pShadowTex;
+    MaterialProperty pBackTextureLevel;
+    MaterialProperty pAlphaMaskLevel;
     MaterialProperty pDisolveSpeed;
 
     MaterialProperty pShadeColor0;
@@ -153,6 +158,8 @@ public class GottaniEditor : ShaderGUI {
     MaterialProperty pMaxPointLightEfect;
 
     MaterialProperty pToon;
+    MaterialProperty pToonMask;
+    MaterialProperty pShadeColor;
     MaterialProperty pShadeShift0;
     MaterialProperty pShadeToony0;
     MaterialProperty pShadeShift1;
@@ -202,6 +209,8 @@ public class GottaniEditor : ShaderGUI {
     MaterialProperty pPositionMemory;
     MaterialProperty pPositionPower;
     MaterialProperty pPositionFactor;
+    MaterialProperty pObjPosFactor;
+    MaterialProperty pObjPosNoise;
     MaterialProperty pMemoryScroll;
     MaterialProperty pGrabity;
     MaterialProperty pExtrusionFactor;
@@ -218,6 +227,7 @@ public class GottaniEditor : ShaderGUI {
     MaterialProperty pParticleSize;
 
     MaterialProperty pTessFactor;
+    MaterialProperty pTessMap;
 
     MaterialProperty pBloomZWrite;
     MaterialProperty pBloomSrcBlend;
@@ -262,14 +272,10 @@ public class GottaniEditor : ShaderGUI {
     MaterialProperty pNoiseMode;
     MaterialProperty pNoise_ST;
     MaterialProperty pNoiseScroll;
-
-    Shader sOpaque, sTransparent;
   
 
     public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
     {
-        sOpaque = Shader.Find("HOTATE/GottaniToon");
-        sTransparent = Shader.Find("Hidden/HOTATE/GottaniToon_Transparent");
         // プロパティを取得
         blendProp = FindProperty("_BlendMode", properties);
         stencilProp = FindProperty("_StencilMode", properties);
@@ -308,7 +314,9 @@ public class GottaniEditor : ShaderGUI {
         pColor = FindProperty("_Color", properties);
         pVertexColorMultiple = FindProperty("_VertexColorMultiple", properties);
 
-        pStereoEyeTexture = FindProperty("_StereoEyeTexture", properties);
+        pMirrorMode = FindProperty("_MirrorMode",properties);
+        pReflectionTex0 = FindProperty("_ReflectionTex0", properties);
+        pReflectionTex1 = FindProperty("_ReflectionTex1", properties);
         
         pHSVMask = FindProperty("_HSVMask", properties);
         pHSVPosMask = FindProperty("_HSVPosMask", properties);
@@ -332,8 +340,6 @@ public class GottaniEditor : ShaderGUI {
         pFarClip = FindProperty("_FarClip", properties);
         pClipThreshold = FindProperty("_ClipThreshold", properties);
 
-        pIS_GRAB_PASS = FindProperty("_IS_GRAB_PASS",properties);
-
         pAlpha2Grab = FindProperty("_Alpha2Grab", properties);
         pGrabBlend = FindProperty("_GrabBlend", properties);
         pGrabMul = FindProperty("_GrabMul", properties);
@@ -352,15 +358,20 @@ public class GottaniEditor : ShaderGUI {
 
         pSubTex = FindProperty("_SubTex", properties);
         pSubColor = FindProperty("_SubColor", properties);
-        pBackTextureLevel = FindProperty("_Sub2BackTextureLevel", properties);
+        pBackTextureLevel = FindProperty("_Tex2BackTextureLevel", properties);
+        pBackTex = FindProperty("_BackTex",properties);
+        pAlphaMask = FindProperty("_AlphaMask",properties);
+        pDisolveMask = FindProperty("_DisolveMask",properties);
+        pShadowTex = FindProperty("_ShadowTex",properties);
 
-        pToonMap = FindProperty("_Sub2ToonMap",properties);
-        pAlphaMask = FindProperty("_Sub2AlphaMask",properties);
+        pAlphaMaskLevel = FindProperty("_Tex2AlphaMask",properties);
         pDisolveSpeed = FindProperty("_DisolveSpeed",properties);
+
+        pShadeColor = FindProperty("_ShadeColor",properties);
 
         pShadeColor0 = FindProperty("_ShadeColor0", properties);
         pShadeColor1 = FindProperty("_ShadeColor1", properties);
-        pShadowTextureLevel = FindProperty("_Sub2ShadowTextureLevel", properties);
+        pShadowTextureLevel = FindProperty("_Tex2ShadowTextureLevel", properties);
 
         pBumpMap = FindProperty("_BumpMap", properties);
         pBumpScale = FindProperty("_BumpScale", properties);
@@ -373,6 +384,7 @@ public class GottaniEditor : ShaderGUI {
         pIndirectLightIntensity = FindProperty("_IndirectLightIntensity", properties);
         pMaxPointLightEfect = FindProperty("_MaxPointLightEfect", properties);
 
+        pToonMask = FindProperty("_ToonMask",properties);
         pToon = FindProperty("_Toon", properties);
         pShadeShift0 = FindProperty("_ShadeShift0", properties);
         pShadeToony0 = FindProperty("_ShadeToony0", properties);
@@ -423,6 +435,8 @@ public class GottaniEditor : ShaderGUI {
         pPositionMemory = FindProperty("_PositionMemory", properties);
         pPositionPower = FindProperty("_PositionPower", properties);
         pPositionFactor = FindProperty("_PositionFactor", properties);
+        pObjPosFactor = FindProperty("_ObjPosFactor",properties);
+        pObjPosNoise = FindProperty("_ObjPosNoise",properties);
         pMemoryScroll = FindProperty("_MemoryScroll", properties);
         pGrabity = FindProperty("_Grabity", properties);
         pExtrusionFactor = FindProperty("_ExtrusionFactor", properties);
@@ -439,6 +453,7 @@ public class GottaniEditor : ShaderGUI {
         pParticleSize = FindProperty("_ParticleSize", properties);
 
         pTessFactor = FindProperty("_TessFactor", properties);
+        pTessMap = FindProperty("_TessMap", properties);
 
         pBloomZWrite = FindProperty("_BloomZWrite", properties);
         pBloomSrcBlend = FindProperty("_BloomSrcBlend", properties);
@@ -514,7 +529,7 @@ public class GottaniEditor : ShaderGUI {
 
             EditorGUILayout.Space();
 
-            materialEditor.VectorProperty(pTessFactor,"テッセレーション");
+            materialEditor.TexturePropertySingleLine(new GUIContent("テッセレーション"),pTessMap,pTessFactor);
             materialEditor.RenderQueueField();
 
             shaderTagStencillactor = Foldout( "ステンシル設定", shaderTagStencillactor, EditorGUI.indentLevel);
@@ -590,13 +605,14 @@ public class GottaniEditor : ShaderGUI {
         if(maintexFactor){using (new EditorGUILayout.VerticalScope("box"))
         {
             materialEditor.VectorProperty(pUVScroll,"UVスクロール");
-            materialEditor.TextureProperty(pStereoEyeTexture,"ステレオテクスチャ(左半分が左目,右半分が右目)");
+            materialEditor.TexturePropertySingleLine(new GUIContent("右目テクスチャ"),pReflectionTex0,pMirrorMode);
+            materialEditor.TexturePropertySingleLine(new GUIContent("左目テクスチャ"),pReflectionTex1);
             materialEditor.TexturePropertySingleLine(new GUIContent("サブテクスチャ"), pSubTex, pSubColor);
-            materialEditor.RangeProperty(pShadowTextureLevel,"影にサブテクスチャをブレンド");
-            materialEditor.RangeProperty(pBackTextureLevel,"裏面にサブテクスチャをブレンド");
-            materialEditor.RangeProperty(pToonMap,"トゥーンマップ(Sub.r)");
-            materialEditor.RangeProperty(pAlphaMask,"アルファマスク(Sub.g)");
-            materialEditor.RangeProperty(pDisolveSpeed,"ディゾルブスピード(Sub.b)");
+            materialEditor.TexturePropertySingleLine(new GUIContent("影にテクスチャをブレンド"),pShadowTex,pShadowTextureLevel);
+            materialEditor.TexturePropertySingleLine(new GUIContent("裏面にテクスチャをブレンド"),pBackTex,pBackTextureLevel);
+            materialEditor.TexturePropertySingleLine(new GUIContent("トゥーンマップ"),pToonMask,pToon);
+            materialEditor.TexturePropertySingleLine(new GUIContent("アルファマスクレベル"),pAlphaMask,pAlphaMaskLevel);
+            materialEditor.TexturePropertySingleLine(new GUIContent("ディゾルブスピードレベル"),pDisolveMask,pDisolveSpeed);
             EditorGUILayout.Space();
             materialEditor.RangeProperty(pVertexColorMultiple,"頂点カラー");
             hsvExchangeFactor = Foldout( "色変換", hsvExchangeFactor, EditorGUI.indentLevel);
@@ -636,34 +652,31 @@ public class GottaniEditor : ShaderGUI {
         grabPassFactor = Foldout("グラブパス", grabPassFactor);
         if(grabPassFactor){using (new EditorGUILayout.VerticalScope("box"))
         {
-            materialEditor.ShaderProperty(pIS_GRAB_PASS,"グラブパスを有効にする(影が無効になります)");
-            if(pIS_GRAB_PASS.floatValue==1)
-            {
-                EditorGUI.indentLevel++;
-                materialEditor.ShaderProperty(pAlpha2Grab,"透明度をグラブパスにする");
-                materialEditor.RangeProperty(pGrabBlend,"ブレンド");
-                materialEditor.RangeProperty(pGrabAdd,"足し算");
-                materialEditor.RangeProperty(pGrabMul,"掛け算");
-                materialEditor.RangeProperty(pRelativeRefractionIndex,"屈折率");
-                materialEditor.RangeProperty(pRefractDistance,"焦点距離");
-                materialEditor.RangeProperty(pGrabMosicFactor,"モザイク");
-                materialEditor.RangeProperty(pGrabColorStepFactor,"イラスト風");
-                materialEditor.RangeProperty(pGrabH,"H");
-                materialEditor.RangeProperty(pGrabS,"S");
-                materialEditor.RangeProperty(pGrabV,"V");
-                materialEditor.VectorProperty(pChromaticAberrationR,"赤色収差");
-                materialEditor.VectorProperty(pChromaticAberrationG,"緑色収差");
-                materialEditor.VectorProperty(pChromaticAberrationB,"青色収差");
-                EditorGUI.indentLevel--;
-            }
+            EditorGUI.indentLevel++;
+            materialEditor.ShaderProperty(pAlpha2Grab,"透明度をグラブパスにする");
+            materialEditor.RangeProperty(pGrabBlend,"ブレンド");
+            materialEditor.RangeProperty(pGrabAdd,"足し算");
+            materialEditor.RangeProperty(pGrabMul,"掛け算");
+            materialEditor.RangeProperty(pRelativeRefractionIndex,"屈折率");
+            materialEditor.RangeProperty(pRefractDistance,"焦点距離");
+            materialEditor.RangeProperty(pGrabMosicFactor,"モザイク");
+            materialEditor.RangeProperty(pGrabColorStepFactor,"イラスト風");
+            materialEditor.RangeProperty(pGrabH,"H");
+            materialEditor.RangeProperty(pGrabS,"S");
+            materialEditor.RangeProperty(pGrabV,"V");
+            materialEditor.VectorProperty(pChromaticAberrationR,"赤色収差");
+            materialEditor.VectorProperty(pChromaticAberrationG,"緑色収差");
+            materialEditor.VectorProperty(pChromaticAberrationB,"青色収差");
+            EditorGUI.indentLevel--;
         }}
 
         pbrFactor = Foldout( "ライティング", pbrFactor);
         if(pbrFactor){using (new EditorGUILayout.VerticalScope("box"))
         {
             EditorGUI.indentLevel++;
+            materialEditor.TexturePropertySingleLine(new GUIContent("トゥーンマップ"),pToonMask,pToon);
             materialEditor.TexturePropertySingleLine(new GUIContent("ノーマルマップ"),pBumpMap,pBumpScale);
-            materialEditor.TexturePropertySingleLine(new GUIContent("シャドウマスク"),pRoughnessMetallicMap);
+            materialEditor.TexturePropertySingleLine(new GUIContent("メタリック/ラフネス/シャドウマスク"),pRoughnessMetallicMap);
             materialEditor.RangeProperty(pMetalic,"メタリック");
             materialEditor.RangeProperty(pRoughness,"ラフネス");
             virtualLightFactor = Foldout( "詳細設定", virtualLightFactor, EditorGUI.indentLevel);
@@ -685,14 +698,15 @@ public class GottaniEditor : ShaderGUI {
         toonFactor = Foldout( "トゥーンシェーディング",toonFactor);
         if(toonFactor){using (new EditorGUILayout.VerticalScope("box"))
         {
-        materialEditor.RangeProperty(pToon,"トゥーンシェーディング");
+            materialEditor.TexturePropertySingleLine(new GUIContent("トゥーンマップ"),pToonMask,pToon);
+            materialEditor.TexturePropertySingleLine(new GUIContent("カスタム影色"),pShadeColor);
             materialEditor.ColorProperty(pShadeColor0,"薄影 色");
             materialEditor.RangeProperty(pShadeShift0,"薄影 位置");
             materialEditor.RangeProperty(pShadeToony0,"薄影 ぼかし");
             materialEditor.ColorProperty(pShadeColor1,"濃影 色");
             materialEditor.RangeProperty(pShadeShift1,"濃影 位置");
             materialEditor.RangeProperty(pShadeToony1,"濃影 色");
-            materialEditor.RangeProperty(pShadowTextureLevel,"影にサブテクスチャをブレンド");
+            materialEditor.TexturePropertySingleLine(new GUIContent("影にテクスチャをブレンド"),pShadowTex,pShadowTextureLevel);
         }}
 
         fresnelFactor = Foldout("マットキャップとリムライト",fresnelFactor);
@@ -747,7 +761,7 @@ public class GottaniEditor : ShaderGUI {
         {
             materialEditor.ShaderProperty(pAlpha2Parallax,"透明度をパララックスにする");
             materialEditor.TexturePropertySingleLine(new GUIContent("マスク"),pParallaxMask);
-            materialEditor.TexturePropertySingleLine(new GUIContent("パララックステクスチャ"),pParallaxTexture,pParticleColor);
+            materialEditor.TexturePropertySingleLine(new GUIContent("パララックステクスチャ"),pParallaxTexture,pParallaxColor);
             materialEditor.VectorProperty(pParallaxScroll,"スクロール");
             materialEditor.FloatProperty(pParallaxDepth,"深さ");
             materialEditor.RangeProperty(pParallaxBlend,"ブレンド");
@@ -759,6 +773,7 @@ public class GottaniEditor : ShaderGUI {
         if(geometryFactor){using (new EditorGUILayout.VerticalScope("box"))
         {
             materialEditor.TexturePropertySingleLine(new GUIContent("メモリ"), pPositionMemory,pPositionPower);
+            materialEditor.TextureScaleOffsetProperty(pPositionMemory);
             materialEditor.VectorProperty(pMemoryScroll,"スクロール");
             materialEditor.RangeProperty(pPositionFactor,"ポリゴンベースか頂点ベースか");
             materialEditor.RangeProperty(pExtrusionFactor,"爆発");
@@ -790,6 +805,8 @@ public class GottaniEditor : ShaderGUI {
                 materialEditor.RangeProperty(pParticleColorFactor,"テクスチャブレンド");
                 materialEditor.RangeProperty(pParticleSize,"サイズ");
                 if(pNOISE_GENERATE.floatValue==1) materialEditor.RangeProperty(pPositionNoise,"ノイズ");
+                materialEditor.RangeProperty(pObjPosFactor,"オブジェクトポジションファクター");
+                materialEditor.RangeProperty(pObjPosNoise,"ファクターノイズ");
                 EditorGUI.indentLevel--;
             }
             matrixFactor = Foldout( "変換行列", matrixFactor, EditorGUI.indentLevel);
@@ -877,28 +894,24 @@ public class GottaniEditor : ShaderGUI {
 	private void SetupBlendMode(Material material, BlendMode blendMode, StencilMode stencilMode) {
         switch (blendMode) {
             case BlendMode.Opaque:
-                material.shader = sOpaque;
                 material.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.One);
                 material.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.Zero);
                 material.SetFloat("_ZWrite", (float)1);
                 material.renderQueue = 2000;
                 break;
             case BlendMode.Transparent:
-                material.shader = sTransparent;
                 material.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
                 material.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
                 material.SetFloat("_ZWrite", (float)1);
                 material.renderQueue = 3000;
                 break;
             case BlendMode.Additive:
-                material.shader = sTransparent;
                 material.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.One);
                 material.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.One);
                 material.SetFloat("_ZWrite", (float)0);
                 material.renderQueue = 3100;
                 break;
             case BlendMode.AdditiveTransparent:
-                material.shader = sTransparent;
                 material.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
                 material.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.One);
                 material.SetFloat("_ZWrite", (float)0);
@@ -915,6 +928,21 @@ public class GottaniEditor : ShaderGUI {
             case StencilMode.Out :
                 material.renderQueue += 1;
                 break;
+        }
+        if(AutoShaderChange){
+            Shader sOpaque = Shader.Find("HOTATE/GottaniToon");
+            Shader sOpaqueStencil = Shader.Find("Hidden/HOTATE/GottaniToon_Stencil");
+            Shader sTransparent = Shader.Find("Hidden/HOTATE/GottaniToon_Transparent");
+            Shader sTransparentStencil = Shader.Find("Hidden/HOTATE/GottaniToon_Transparent_Stencil");
+            if(material.renderQueue <= 2000){
+                material.shader = sOpaque;
+            }else if(material.renderQueue <= 2500){
+                material.shader = sOpaqueStencil;
+            }else if(material.renderQueue <= 3000){
+                material.shader = sTransparent;
+            }else{
+                material.shader = sTransparentStencil;
+            }
         }
     }
 
@@ -954,6 +982,21 @@ public class GottaniEditor : ShaderGUI {
                 material.SetFloat("_StencilPass", (float)UnityEngine.Rendering.StencilOp.Keep);
                 material.renderQueue += 1;
                 break;
+        }
+        if(AutoShaderChange){
+            Shader sOpaque = Shader.Find("HOTATE/GottaniToon");
+            Shader sOpaqueStencil = Shader.Find("Hidden/HOTATE/GottaniToon_Stencil");
+            Shader sTransparent = Shader.Find("Hidden/HOTATE/GottaniToon_Transparent");
+            Shader sTransparentStencil = Shader.Find("Hidden/HOTATE/GottaniToon_Transparent_Stencil");
+            if(material.renderQueue <= 2000){
+                material.shader = sOpaque;
+            }else if(material.renderQueue <= 2500){
+                material.shader = sOpaqueStencil;
+            }else if(material.renderQueue <= 3000){
+                material.shader = sTransparent;
+            }else{
+                material.shader = sTransparentStencil;
+            }
         }
     }
     private void SetupBloomBlendMode(Material material, BloomBlendMode blendMode) {
