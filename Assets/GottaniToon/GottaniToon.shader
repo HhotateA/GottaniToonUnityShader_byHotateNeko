@@ -116,23 +116,25 @@ Shader "HOTATE/GottaniToon"
         _LightColorAttenuation ("Light Color Attenuation", Range(-1, 1)) = 0
         _ReceiveShadowRate ("Receive Shadow", Range(0, 1)) = 0.1
         _IndirectLightIntensity ("Indirect Light Intensity", Range(0, 1)) = 0.8
-		_MaxPointLightEfect ("Max PointLight Efect", range(0,1)) = 1
+		_MaxPointLightEfect ("Max PointLight Efect", range(0,1)) = 0.3
 
         [Header(Toon)] [HiddenInspector] _Dummy ("Dummy",int) = 0
 		[NoScaleOffset]_ShadeColor ("Custom Shade Color", 2D) = "white" {}
         _ShadeColor0 ("1st Shade Color", Color) = (0.97, 0.81, 0.86, 1)
         _ShadeShift0 ("1st Shade Shift", Range(-1, 1)) = 0.173
         _ShadeToony0 ("1st Shade Toony", Range(0, 1)) = 0.383
+		_Shade1Power0 ("ShadowPower 0",float) = 2
         _ShadeColor1 ("2nd Shade Color", Color) = (0.9, 0.61, 0.68, 1)
         _ShadeShift1 ("2nd Shade Shift", Range(-1, 1)) = 0.288
         _ShadeToony1 ("2nd Shade Toony", Range(0, 1)) = 0.829
+		_Shade1Power1 ("ShadowPower 1",float) = 1
         [NoScaleOffset] _ShadowTex ("Shadow Texture", 2D) = "white" {}
         _Tex2ShadowTextureLevel ("Shadow Texture Level", Range(0, 1)) = 0
 
         [Header(Rim,Matcap)] [HiddenInspector] _Dummy ("Dummy",int) = 0
         _FresnelMask ("Mask", 2D) = "white" {}
 
-        [HDR] _RimColor ("Rim Color", Color) = (1,0.77,0.96,1)
+        [HDR] _RimColor ("Rim Color", Color) = (0,0,0,1)//(1,0.77,0.96,1)
         _RimFresnelPower ("Rim Fresnel Power", Range(1, 5)) = 4.89
         _RimLift ("Rim Lift", Range(0, 1)) = 0.38
         _RimPower ("Rim Power", Range(0, 1)) = 0.008
@@ -148,8 +150,9 @@ Shader "HOTATE/GottaniToon"
 		_OutlineMask ("OutlineMask", 2D) = "white" {}
 		_OutlineTex ("Outline Texture", 2D) = "white" {}
         _OutlineColor ("Outline Color", Color) = (0.48,0.46,0.45,1)
-		_OutlineWidth ("Outline Width",float) = 0.3
+		_OutlineWidth ("Outline Width",float) = 0.0
 		_OutlineMainTexBlend ("MaintexBlend",range(0,1)) = 1
+		_OutlineWidthDist ("OutlineWidthDist",float) = 3
 
         [Header(PBR)] [HiddenInspector] _Dummy ("Dummy",int) = 0
 		[Header(Metalic)] [HiddenInspector] _Dummy ("Dummy",int) = 0
@@ -351,7 +354,7 @@ SubShader
 						memoryUV = TRANSFORM_TEX(memoryUV,_PositionMemory);
 						float noise = random(memoryUV);
 						float distDepth = distance(mul(UNITY_MATRIX_M,input[i].pos),_WorldSpaceStereoCameraPos);
-						float3 outlineWidth = lerp(input[i].pos,input[i].normal,_OutlineBase)* tex2Dlod(_OutlineMask,float4(input[i].uv,0,0)).b * min(3,distDepth) * _OutlineWidth * 0.001;
+						float3 outlineWidth = lerp(input[i].pos,input[i].normal,_OutlineBase)* tex2Dlod(_OutlineMask,float4(input[i].uv,0,0)).b * min(_OutlineWidthDist,distDepth) * _OutlineWidth * 0.001;
 						float4 extrusionPos = float4(input[i].pos.xyz,1);
 						extrusionPos.xyz -= mPos;
 						float rotationFactor = saturate(_RotationFactor*(1+_RotationNoise) - noise*_RotationNoise);
@@ -438,8 +441,8 @@ SubShader
 				lightColor *= lightAttenuation;
 
 				// GI
-				fixed3 toonedGI = 0.5 * (ShadeSH9(half4(0, 1, 0, 1)) + ShadeSH9(half4(0, -1, 0, 1)));
-				fixed3 indirectLighting = lerp(toonedGI, ShadeSH9(half4(normalDir, 1)), _IndirectLightIntensity);
+				fixed3 toonedGI = (ShadeSH9(half4(1, 0, 0, 1)) + ShadeSH9(half4(-1, 0, 0, 1)) + ShadeSH9(half4(0, 1, 0, 1)) + ShadeSH9(half4(0, -1, 0, 1)) + ShadeSH9(half4(0, 0, 1, 1)) + ShadeSH9(half4(0, 0, -1, 1)))/6;
+				fixed3 indirectLighting = lerp( ShadeSH9(half4(normalDir, 1)), toonedGI, _IndirectLightIntensity);
 				indirectLighting = _VirtualGI<0 ? max( -_VirtualGI.xxx, indirectLighting) : lerp( _VirtualGI.xxx, indirectLighting, indirectLighting); // GIの最低値
 				indirectLighting = lerp( indirectLighting, max(indirectLighting.x, max(indirectLighting.y, indirectLighting.z)).xxx, saturate(_LightColorAttenuation)); // ColorAttenuation
 
@@ -686,8 +689,8 @@ SubShader
 				lightColor *= lightAttenuation;
 
 				// GI
-				fixed3 toonedGI = 0.5 * (ShadeSH9(half4(0, 1, 0, 1)) + ShadeSH9(half4(0, -1, 0, 1)));
-				fixed3 indirectLighting = lerp(toonedGI, ShadeSH9(half4(normalDir, 1)), _IndirectLightIntensity);
+				fixed3 toonedGI = (ShadeSH9(half4(1, 0, 0, 1)) + ShadeSH9(half4(-1, 0, 0, 1)) + ShadeSH9(half4(0, 1, 0, 1)) + ShadeSH9(half4(0, -1, 0, 1)) + ShadeSH9(half4(0, 0, 1, 1)) + ShadeSH9(half4(0, 0, -1, 1)))/6;
+				fixed3 indirectLighting = lerp( ShadeSH9(half4(normalDir, 1)), toonedGI, _IndirectLightIntensity);
 				indirectLighting = _VirtualGI<0 ? max( -_VirtualGI.xxx, indirectLighting) : lerp( _VirtualGI.xxx, indirectLighting, indirectLighting); // GIの最低値
 				indirectLighting = lerp( indirectLighting, max(indirectLighting.x, max(indirectLighting.y, indirectLighting.z)).xxx, saturate(_LightColorAttenuation)); // ColorAttenuation
 
@@ -995,8 +998,8 @@ SubShader
 				//lightColor *= length(lightPos)*length(lightPos);
 
 				// GI
-				fixed3 toonedGI = 0.5 * (ShadeSH9(half4(0, 1, 0, 1)) + ShadeSH9(half4(0, -1, 0, 1)));
-				fixed3 indirectLighting = lerp(toonedGI, ShadeSH9(half4(normalDir, 1)), _IndirectLightIntensity);
+				fixed3 toonedGI = (ShadeSH9(half4(1, 0, 0, 1)) + ShadeSH9(half4(-1, 0, 0, 1)) + ShadeSH9(half4(0, 1, 0, 1)) + ShadeSH9(half4(0, -1, 0, 1)) + ShadeSH9(half4(0, 0, 1, 1)) + ShadeSH9(half4(0, 0, -1, 1)))/6;
+				fixed3 indirectLighting = lerp( ShadeSH9(half4(normalDir, 1)), toonedGI, _IndirectLightIntensity);
 				indirectLighting = _VirtualGI<0 ? max( -_VirtualGI.xxx, indirectLighting) : lerp( _VirtualGI.xxx, indirectLighting, indirectLighting); // GIの最低値
 				indirectLighting = lerp( indirectLighting, max(indirectLighting.x, max(indirectLighting.y, indirectLighting.z)).xxx, saturate(_LightColorAttenuation)); // ColorAttenuation
 
@@ -1343,6 +1346,7 @@ SubShader
 			float _ShadeToony0;
 			float _ShadeShift1;
 			float _ShadeToony1;
+			float _Shade1Power0,_Shade1Power1;
 
 			//Mask
 			UNITY_DECLARE_TEX2D_NOSAMPLER(_FresnelMask);
@@ -1378,6 +1382,7 @@ SubShader
 				sampler2D _OutlineMask;
 				sampler2D _OutlineTex;
 				float _OutlineMainTexBlend;
+				float _OutlineWidthDist;
 			// */
 			
 			//* ベースカラー専用処理
@@ -1796,10 +1801,10 @@ SubShader
 			// Threshold
 			float maxIntensityThreshold0 = lerp(1, shadeShift0, shadeToony0);
 			float minIntensityThreshold0 = shadeShift0;
-			float lightIntensity0 = pow(saturate((lambert - minIntensityThreshold0) / max(LIMIT_ZERO, (maxIntensityThreshold0 - minIntensityThreshold0))),2);
+			float lightIntensity0 = pow(saturate((lambert - minIntensityThreshold0) / max(LIMIT_ZERO, (maxIntensityThreshold0 - minIntensityThreshold0))),_Shade1Power0);
 			float maxIntensityThreshold1 = shadeShift1;
 			float minIntensityThreshold1 = lerp(shadeShift1, -1, 1-shadeToony1);
-			float lightIntensity1 = saturate((lambert - minIntensityThreshold1) / max(LIMIT_ZERO, (maxIntensityThreshold1 - minIntensityThreshold1)));
+			float lightIntensity1 = pow(saturate((lambert - minIntensityThreshold1) / max(LIMIT_ZERO, (maxIntensityThreshold1 - minIntensityThreshold1))),_Shade1Power1);
 
 			// Albedo color
 			fixed3 lit =  mainCol;

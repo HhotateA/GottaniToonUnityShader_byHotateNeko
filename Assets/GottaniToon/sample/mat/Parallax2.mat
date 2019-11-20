@@ -131,7 +131,7 @@ Material:
     - _AddMirrorCulling: 0
     - _Alpha2Grab: 0
     - _Alpha2Parallax: 0
-    - _AlphaCut: 0
+    - _AlphaCut: 0.465
     - _BaseCameraCulling: 0
     - _BaseMirrorCulling: 0
     - _BillBoard: 0
@@ -202,12 +202,13 @@ Material:
     - _OutlineCullMode: 2
     - _OutlineMainTexBlend: 1
     - _OutlineWidth: 0.3
+    - _OutlineWidthDist: 3
     - _OverrideH: 0
     - _OverridePosMask: 0
     - _OverrideS: 0.5
     - _OverrideV: 0.5
     - _ParallaxAdd: 0
-    - _ParallaxBlend: 0
+    - _ParallaxBlend: 1
     - _ParallaxDepth: 5
     - _ParallaxMul: 0
     - _ParticleColorFactor: 0
@@ -230,6 +231,8 @@ Material:
     - _S: 0.5
     - _ScaleFactor: 1
     - _ScaleNoise: 0
+    - _Shade1Power0: 2
+    - _Shade1Power1: 1
     - _ShadeShift0: 0.173
     - _ShadeShift1: 0.288
     - _ShadeToony0: 0.383

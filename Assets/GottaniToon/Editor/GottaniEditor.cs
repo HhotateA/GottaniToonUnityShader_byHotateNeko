@@ -26,6 +26,8 @@ public class GottaniEditor : ShaderGUI {
         In,
     }
 
+    static bool isEnglishMode = false;
+
 	private MaterialProperty blendProp, stencilProp, bloomBlendProp;
 
     static bool shaderTagFactor = false; 
@@ -501,388 +503,774 @@ public class GottaniEditor : ShaderGUI {
             
         var materials = materialEditor.targets.Cast<Material>();
 
-        shaderTagFactor = Foldout( "シェーダータグ", shaderTagFactor);
-        if(shaderTagFactor){using (new EditorGUILayout.VerticalScope("box"))
-        {
-            BlendMode b_mode = (BlendMode)this.blendProp.floatValue;
-            StencilMode s_mode = (StencilMode)this.stencilProp.floatValue;
-            EditorGUI.BeginChangeCheck();
-            b_mode = (BlendMode)EditorGUILayout.Popup("ブレンドモード", (int)b_mode, Enum.GetNames(typeof(BlendMode)));
-            if (EditorGUI.EndChangeCheck()) {
-                this.blendProp.floatValue = (float)b_mode;
-                foreach (UnityEngine.Object obj in this.blendProp.targets)
-                    this.SetupBlendMode(obj as Material, b_mode, s_mode);
-            }
-
-            materialEditor.RangeProperty(pAlphaCut,"アルファカットアウト");
-
-            EditorGUILayout.Space();
-            
-            EditorGUI.BeginChangeCheck();
-            s_mode = (StencilMode)EditorGUILayout.Popup("ステンシルモード", (int)s_mode, Enum.GetNames(typeof(StencilMode)));
-            if (EditorGUI.EndChangeCheck()) {
-                this.stencilProp.floatValue = (float)s_mode;
-                foreach (UnityEngine.Object obj in this.stencilProp.targets)
-                    this.SetupStencilMode(obj as Material,b_mode, s_mode);
-            }
-            materialEditor.ShaderProperty(pStencil,"ステンシル値");
-
-            EditorGUILayout.Space();
-
-            materialEditor.TexturePropertySingleLine(new GUIContent("テッセレーション"),pTessMap,pTessFactor);
-            materialEditor.RenderQueueField();
-
-            shaderTagStencillactor = Foldout( "ステンシル設定", shaderTagStencillactor, EditorGUI.indentLevel);
-            if(shaderTagStencillactor)
+        isEnglishMode = EditorGUILayout.Toggle("EnglishMode", isEnglishMode);
+        if(isEnglishMode){
+            shaderTagFactor = Foldout( "ShaderTag", shaderTagFactor);
+            if(shaderTagFactor){using (new EditorGUILayout.VerticalScope("box"))
             {
-                EditorGUI.indentLevel++;
-                materialEditor.ShaderProperty(pStencil,"ステンシル値");
-                materialEditor.ShaderProperty(pReadMask,"ReadMask");
-                materialEditor.ShaderProperty(pWriteMask,"WriteMask");
-                materialEditor.ShaderProperty(pStencilComp,"ステンシル値テスト");
-                materialEditor.ShaderProperty(pStencilPass,"合格");
-                materialEditor.ShaderProperty(pStencilFail,"不合格");
-                materialEditor.ShaderProperty(pStencilZFail,"ZTest不合格");
-                EditorGUI.indentLevel--;
-            }
+                BlendMode b_mode = (BlendMode)this.blendProp.floatValue;
+                StencilMode s_mode = (StencilMode)this.stencilProp.floatValue;
+                EditorGUI.BeginChangeCheck();
+                b_mode = (BlendMode)EditorGUILayout.Popup("Blend Mode", (int)b_mode, Enum.GetNames(typeof(BlendMode)));
+                if (EditorGUI.EndChangeCheck()) {
+                    this.blendProp.floatValue = (float)b_mode;
+                    foreach (UnityEngine.Object obj in this.blendProp.targets)
+                        this.SetupBlendMode(obj as Material, b_mode, s_mode);
+                }
 
-            shaderTagBlendFactor = Foldout( "ブレンド設定", shaderTagBlendFactor, EditorGUI.indentLevel);
-            if(shaderTagBlendFactor)
-            {
-                EditorGUI.indentLevel++;
-                materialEditor.ShaderProperty(pSrcBlend,"ベースパス SrcBlend");
-                materialEditor.ShaderProperty(pDstBlend,"ベースパス DstBlend");
-                materialEditor.ShaderProperty(pBloomSrcBlend,"ブルーム SrcBlend");
-                materialEditor.ShaderProperty(pBloomDstBlend,"ブルーム DstBlend");
-                materialEditor.ShaderProperty(pZWrite,"ZWrite");
-                materialEditor.ShaderProperty(pZTest,"ZTest");
-                materialEditor.ShaderProperty(pBloomZWrite,"ブルーム ZWrite");
-                EditorGUI.indentLevel--;
-            }
-            shaderTagCullingFactor = Foldout("カリング設定",shaderTagCullingFactor, EditorGUI.indentLevel);
-            if(shaderTagCullingFactor)
-            {
-                EditorGUI.indentLevel++;
-                materialEditor.ShaderProperty(pCullMode,"ベースパス カリング");
-                materialEditor.ShaderProperty(pOutlineCullMode,"アウトライン カリング");
-                materialEditor.ShaderProperty(pBloomCullMode,"ブルーム カリング");
+                materialEditor.RangeProperty(pAlphaCut,"Alpha Cut Out");
+
                 EditorGUILayout.Space();
-                materialEditor.ShaderProperty(pMirrorCulling,"ミラーカリング");
-                materialEditor.ShaderProperty(pCameraCulling,"カメラカリング");
-                addvanceCullingFactor = Foldout("詳細",addvanceCullingFactor, EditorGUI.indentLevel);
-                if(addvanceCullingFactor)
+                
+                EditorGUI.BeginChangeCheck();
+                s_mode = (StencilMode)EditorGUILayout.Popup("Stencil Mode", (int)s_mode, Enum.GetNames(typeof(StencilMode)));
+                if (EditorGUI.EndChangeCheck()) {
+                    this.stencilProp.floatValue = (float)s_mode;
+                    foreach (UnityEngine.Object obj in this.stencilProp.targets)
+                        this.SetupStencilMode(obj as Material,b_mode, s_mode);
+                }
+                materialEditor.ShaderProperty(pStencil,"Stencil Ref");
+
+                EditorGUILayout.Space();
+
+                materialEditor.TexturePropertySingleLine(new GUIContent("Tesselation"),pTessMap,pTessFactor);
+                materialEditor.RenderQueueField();
+
+                shaderTagStencillactor = Foldout( "Stencil Advanced Setting", shaderTagStencillactor, EditorGUI.indentLevel);
+                if(shaderTagStencillactor)
                 {
                     EditorGUI.indentLevel++;
-                    materialEditor.ShaderProperty(pBaseMirrorCulling,"ベースパス ミラーカリング");
-                    materialEditor.ShaderProperty(pBaseCameraCulling,"ベースパス カメラカリング");
-                    materialEditor.ShaderProperty(pAddMirrorCulling,"ポイントライトパス ミラーカリング");
-                    materialEditor.ShaderProperty(pAddCameraCulling,"ポイントライトパス カメラカリング");
-                    materialEditor.ShaderProperty(pShadowMirrorCulling,"シャドウパス ミラーカリング");
-                    materialEditor.ShaderProperty(pShadowCameraCulling,"シャドウパス カメラカリング");
-                    materialEditor.ShaderProperty(pBloomMirrorCulling,"ブルームパス ミラーカリング");
-                    materialEditor.ShaderProperty(pBloomCameraCulling,"ブルームパス カメラカリング");
-                    materialEditor.VectorProperty(pCameraResolution,"カメラ解像度");
+                    materialEditor.ShaderProperty(pStencil,"Stencil Ref");
+                    materialEditor.ShaderProperty(pReadMask,"ReadMask");
+                    materialEditor.ShaderProperty(pWriteMask,"WriteMask");
+                    materialEditor.ShaderProperty(pStencilComp,"Comp");
+                    materialEditor.ShaderProperty(pStencilPass,"Pass");
+                    materialEditor.ShaderProperty(pStencilFail,"Fail");
+                    materialEditor.ShaderProperty(pStencilZFail,"ZTestFail");
                     EditorGUI.indentLevel--;
                 }
-                EditorGUI.indentLevel--;
-                EditorGUILayout.LabelField("DistanceFade", EditorStyles.boldLabel);
-                EditorGUI.indentLevel++;
-                materialEditor.FloatProperty(pNearClip,"NearClip");
-                materialEditor.FloatProperty(pFarClip,"FarClip");
-                materialEditor.RangeProperty(pClipThreshold,"ノイズ");
-                EditorGUI.indentLevel--;
-            }
-        }}
 
-        mainFactor = Foldout( "メインテクスチャ", mainFactor);
-        if(mainFactor){using (new EditorGUILayout.VerticalScope("box"))
-        {
-            materialEditor.TexturePropertySingleLine(new GUIContent("メインテクスチャ"), pMainTex, pColor);
-            materialEditor.TextureScaleOffsetProperty(pMainTex);
-        }}
-
-        maintexFactor = Foldout( "メインテクスチャ ファクター", maintexFactor);
-        if(maintexFactor){using (new EditorGUILayout.VerticalScope("box"))
-        {
-            materialEditor.VectorProperty(pUVScroll,"UVスクロール");
-            materialEditor.TexturePropertySingleLine(new GUIContent("右目テクスチャ"),pReflectionTex0,pMirrorMode);
-            materialEditor.TexturePropertySingleLine(new GUIContent("左目テクスチャ"),pReflectionTex1);
-            materialEditor.TexturePropertySingleLine(new GUIContent("サブテクスチャ"), pSubTex, pSubColor);
-            materialEditor.TexturePropertySingleLine(new GUIContent("影にテクスチャをブレンド"),pShadowTex,pShadowTextureLevel);
-            materialEditor.TexturePropertySingleLine(new GUIContent("裏面にテクスチャをブレンド"),pBackTex,pBackTextureLevel);
-            materialEditor.TexturePropertySingleLine(new GUIContent("トゥーンマップ"),pToonMask,pToon);
-            materialEditor.TexturePropertySingleLine(new GUIContent("アルファマスクレベル"),pAlphaMask,pAlphaMaskLevel);
-            materialEditor.TexturePropertySingleLine(new GUIContent("ディゾルブスピードレベル"),pDisolveMask,pDisolveSpeed);
-            EditorGUILayout.Space();
-            materialEditor.RangeProperty(pVertexColorMultiple,"頂点カラー");
-            hsvExchangeFactor = Foldout( "色変換", hsvExchangeFactor, EditorGUI.indentLevel);
-            if(hsvExchangeFactor)
-            {
-                EditorGUI.indentLevel++;
-                materialEditor.ShaderProperty(pHSVPosMask,"モデル座標マスク");
-                materialEditor.TexturePropertySingleLine(new GUIContent("マスク"),pHSVMask);
-                materialEditor.RangeProperty(pColorStepFactor,"イラスト風");
-                materialEditor.RangeProperty(pH,"H");
-                materialEditor.RangeProperty(pS,"S");
-                materialEditor.RangeProperty(pV,"V");
-                hsvExchangeColor = Foldout( "色サンプルから変換", hsvExchangeColor, EditorGUI.indentLevel);
-                if(hsvExchangeColor)
+                shaderTagBlendFactor = Foldout( "Blend Advanced Setting", shaderTagBlendFactor, EditorGUI.indentLevel);
+                if(shaderTagBlendFactor)
                 {
                     EditorGUI.indentLevel++;
-                    materialEditor.ColorProperty(pExchangeColor,"サンプル");
-                    materialEditor.RangeProperty(pExchangeThreshold,"許容誤差");
+                    materialEditor.ShaderProperty(pSrcBlend,"BassPass SrcBlend");
+                    materialEditor.ShaderProperty(pDstBlend,"BassPass DstBlend");
+                    materialEditor.ShaderProperty(pBloomSrcBlend,"BloomPass SrcBlend");
+                    materialEditor.ShaderProperty(pBloomDstBlend,"BloomPass DstBlend");
+                    materialEditor.ShaderProperty(pZWrite,"BasePass ZWrite");
+                    materialEditor.ShaderProperty(pZTest,"BassPass ZTest");
+                    materialEditor.ShaderProperty(pBloomZWrite,"BloomPass ZWrite");
                     EditorGUI.indentLevel--;
                 }
-                EditorGUI.indentLevel--;
-            }
-            overlayTextureFactor = Foldout( "テクスチャ上書き", overlayTextureFactor, EditorGUI.indentLevel);
-            if(overlayTextureFactor)
-            {
-                EditorGUI.indentLevel++;
-                materialEditor.ShaderProperty(pOverridePosMask,"モデル座標マスク");
-                materialEditor.TexturePropertySingleLine(new GUIContent("テクスチャ"),pOverrideTexture,pOverrideColor);
-                materialEditor.TextureScaleOffsetProperty(pOverrideTexture);
-                materialEditor.RangeProperty(pOverrideH,"H");
-                materialEditor.RangeProperty(pOverrideS,"S");
-                materialEditor.RangeProperty(pOverrideV,"V");
-                EditorGUI.indentLevel--;
-            }
-        }}
-
-        grabPassFactor = Foldout("グラブパス", grabPassFactor);
-        if(grabPassFactor){using (new EditorGUILayout.VerticalScope("box"))
-        {
-            EditorGUI.indentLevel++;
-            materialEditor.ShaderProperty(pAlpha2Grab,"透明度をグラブパスにする");
-            materialEditor.RangeProperty(pGrabBlend,"ブレンド");
-            materialEditor.RangeProperty(pGrabAdd,"足し算");
-            materialEditor.RangeProperty(pGrabMul,"掛け算");
-            materialEditor.RangeProperty(pRelativeRefractionIndex,"屈折率");
-            materialEditor.RangeProperty(pRefractDistance,"焦点距離");
-            materialEditor.RangeProperty(pGrabMosicFactor,"モザイク");
-            materialEditor.RangeProperty(pGrabColorStepFactor,"イラスト風");
-            materialEditor.RangeProperty(pGrabH,"H");
-            materialEditor.RangeProperty(pGrabS,"S");
-            materialEditor.RangeProperty(pGrabV,"V");
-            materialEditor.VectorProperty(pChromaticAberrationR,"赤色収差");
-            materialEditor.VectorProperty(pChromaticAberrationG,"緑色収差");
-            materialEditor.VectorProperty(pChromaticAberrationB,"青色収差");
-            EditorGUI.indentLevel--;
-        }}
-
-        pbrFactor = Foldout( "ライティング", pbrFactor);
-        if(pbrFactor){using (new EditorGUILayout.VerticalScope("box"))
-        {
-            EditorGUI.indentLevel++;
-            materialEditor.TexturePropertySingleLine(new GUIContent("トゥーンマップ"),pToonMask,pToon);
-            materialEditor.TexturePropertySingleLine(new GUIContent("ノーマルマップ"),pBumpMap,pBumpScale);
-            materialEditor.TexturePropertySingleLine(new GUIContent("メタリック/ラフネス/シャドウマスク"),pRoughnessMetallicMap);
-            materialEditor.RangeProperty(pMetalic,"メタリック");
-            materialEditor.RangeProperty(pRoughness,"ラフネス");
-            virtualLightFactor = Foldout( "詳細設定", virtualLightFactor, EditorGUI.indentLevel);
-            if(virtualLightFactor)
-            {
-                materialEditor.RangeProperty(pVirtualLight,"仮想ディレクショナルライト");
-                materialEditor.RangeProperty(pVirtualGI,"仮想環境光");
-                materialEditor.RangeProperty(pLightColorAttenuation,"ライト色の平均化");
-                materialEditor.RangeProperty(pReceiveShadowRate,"影の濃さ");
-                materialEditor.RangeProperty(pIndirectLightIntensity,"ライト方向の平均化");
-                materialEditor.RangeProperty(pMaxPointLightEfect,"ポイントライトの影響");
-                materialEditor.RangeProperty(pLambert,"ハーフ ランバート");
-                materialEditor.RangeProperty(pFlatShading,"フラットシェーディング");
-                materialEditor.RangeProperty(pBloomLightEffect,"ブルームパスへのライトの影響");
-            }
-            EditorGUI.indentLevel--;
-        }}
-        
-        toonFactor = Foldout( "トゥーンシェーディング",toonFactor);
-        if(toonFactor){using (new EditorGUILayout.VerticalScope("box"))
-        {
-            materialEditor.TexturePropertySingleLine(new GUIContent("トゥーンマップ"),pToonMask,pToon);
-            materialEditor.TexturePropertySingleLine(new GUIContent("カスタム影色"),pShadeColor);
-            materialEditor.ColorProperty(pShadeColor0,"薄影 色");
-            materialEditor.RangeProperty(pShadeShift0,"薄影 位置");
-            materialEditor.RangeProperty(pShadeToony0,"薄影 ぼかし");
-            materialEditor.ColorProperty(pShadeColor1,"濃影 色");
-            materialEditor.RangeProperty(pShadeShift1,"濃影 位置");
-            materialEditor.RangeProperty(pShadeToony1,"濃影 色");
-            materialEditor.TexturePropertySingleLine(new GUIContent("影にテクスチャをブレンド"),pShadowTex,pShadowTextureLevel);
-        }}
-
-        fresnelFactor = Foldout("マットキャップとリムライト",fresnelFactor);
-        if(fresnelFactor){using (new EditorGUILayout.VerticalScope("box"))
-        {
-            materialEditor.TexturePropertySingleLine(new GUIContent("マスク"),pFresnelMask);
-            EditorGUILayout.LabelField("リムライト", EditorStyles.boldLabel);
-            EditorGUI.indentLevel++;
-                materialEditor.ColorProperty(pRimColor,"リムカラー");
-                materialEditor.RangeProperty(pRimLift,"リムシフト");
-                materialEditor.RangeProperty(pRimPower,"リムパワー");
-                materialEditor.RangeProperty(pRimFresnel,"フレネル乗数");
-                materialEditor.RangeProperty(pRimFresnelPower,"フレネルパワー");
-            EditorGUI.indentLevel--;
-            EditorGUILayout.LabelField("マットキャップ", EditorStyles.boldLabel);
-            EditorGUI.indentLevel++;
-                materialEditor.TexturePropertySingleLine(new GUIContent("マットキャップ"),pMatCap,pMatCapColor,pMatcapMode);
-            EditorGUI.indentLevel--;
-        }}
-
-        outlineFactor = Foldout( "アウトライン", outlineFactor);
-        if(outlineFactor){using (new EditorGUILayout.VerticalScope("box"))
-        {
-            materialEditor.ShaderProperty(pOutlineBase,"アウトラインモード");
-            materialEditor.TexturePropertySingleLine(new GUIContent("マスク"), pOutlineMask);
-            materialEditor.FloatProperty(pOutlineWidth,"太さ");
-            materialEditor.TexturePropertySingleLine(new GUIContent("テクスチャ"),pOutlineTex,pOutlineColor);
-            materialEditor.RangeProperty(pOutlineMainTexBlend,"テクスチャブレンド");
-        }}
-
-        emissionFactor = Foldout( "エミッション", emissionFactor);
-        if(emissionFactor){using (new EditorGUILayout.VerticalScope("box"))
-        {
-            materialEditor.TexturePropertySingleLine(new GUIContent("マスク"), pEmissionMask);
-            materialEditor.TexturePropertyWithHDRColor(new GUIContent("エミッション"), pEmissionTex, pEmissionColor, new ColorPickerHDRConfig(0, 100, 0.01f, 3.0f), false);
-            materialEditor.TextureScaleOffsetProperty(pEmissionTex);
-            materialEditor.VectorProperty(pEmissionVelocity,"エミッシブスクロール(wは速度)");
-            materialEditor.VectorProperty(pEmissionScroll,"テクスチャスクロール");
-            materialEditor.RangeProperty(pEmissionWidth,"太さ");
-        }}
-        
-        wireframeFactor = Foldout( "ワイヤーフレーム", wireframeFactor);
-        if(wireframeFactor){using (new EditorGUILayout.VerticalScope("box"))
-        {
-            materialEditor.ColorProperty(pWireframeColor,"色");
-            materialEditor.RangeProperty(pWireframeBlend,"テクスチャブレンド");
-            materialEditor.RangeProperty(pWireframeWidth,"太さ");
-        }}
-
-        parallaxFactor = Foldout( "パララックスマッピング", parallaxFactor);
-        if(parallaxFactor){using (new EditorGUILayout.VerticalScope("box"))
-        {
-            materialEditor.ShaderProperty(pAlpha2Parallax,"透明度をパララックスにする");
-            materialEditor.TexturePropertySingleLine(new GUIContent("マスク"),pParallaxMask);
-            materialEditor.TexturePropertySingleLine(new GUIContent("パララックステクスチャ"),pParallaxTexture,pParallaxColor);
-            materialEditor.VectorProperty(pParallaxScroll,"スクロール");
-            materialEditor.FloatProperty(pParallaxDepth,"深さ");
-            materialEditor.RangeProperty(pParallaxBlend,"ブレンド");
-            materialEditor.RangeProperty(pParallaxAdd,"足し算");
-            materialEditor.RangeProperty(pParallaxMul,"掛け算");
-        }}
-
-        geometryFactor = Foldout( "頂点シェーダー", geometryFactor);
-        if(geometryFactor){using (new EditorGUILayout.VerticalScope("box"))
-        {
-            materialEditor.TexturePropertySingleLine(new GUIContent("メモリ"), pPositionMemory,pPositionPower);
-            materialEditor.TextureScaleOffsetProperty(pPositionMemory);
-            materialEditor.VectorProperty(pMemoryScroll,"スクロール");
-            materialEditor.RangeProperty(pPositionFactor,"ポリゴンベースか頂点ベースか");
-            materialEditor.RangeProperty(pExtrusionFactor,"爆発");
-            materialEditor.RangeProperty(pExtrusionNoise,"爆発ノイズ");
-            materialEditor.VectorProperty(pGrabity,"重力");
-            materialEditor.RangeProperty(pRotationFactor,"回転");
-            materialEditor.RangeProperty(pRotationNoise,"回転ノイズ");
-            materialEditor.RangeProperty(pScaleFactor,"スケール");
-            materialEditor.RangeProperty(pScaleNoise,"スケールノイズ");
-
-            doppelgengerFactor = Foldout( "分身", doppelgengerFactor, EditorGUI.indentLevel);
-            if(doppelgengerFactor)
-            {
-                EditorGUI.indentLevel++;
-                materialEditor.ShaderProperty(pIS_DOPPELGENGER,"ドッペルゲンガー");
-                if(pIS_DOPPELGENGER.floatValue==1){
-                    materialEditor.ShaderProperty(pDoppelganger,"分身数");
-                    materialEditor.VectorProperty(pDoppelgangerPos,"分身方向");
-                }
-                EditorGUI.indentLevel--;
-            }
-
-            gpupFactor = Foldout( "GPUパーティクル", gpupFactor, EditorGUI.indentLevel);
-            if(gpupFactor)
-            {
-                EditorGUI.indentLevel++;
-                materialEditor.RangeProperty(pParticleFactor,"パーティクルファクター");
-                materialEditor.ColorProperty(pParticleColor,"カラー");
-                materialEditor.RangeProperty(pParticleColorFactor,"テクスチャブレンド");
-                materialEditor.RangeProperty(pParticleSize,"サイズ");
-                if(pNOISE_GENERATE.floatValue==1) materialEditor.RangeProperty(pPositionNoise,"ノイズ");
-                materialEditor.RangeProperty(pObjPosFactor,"オブジェクトポジションファクター");
-                materialEditor.RangeProperty(pObjPosNoise,"ファクターノイズ");
-                EditorGUI.indentLevel--;
-            }
-            matrixFactor = Foldout( "変換行列", matrixFactor, EditorGUI.indentLevel);
-            if(matrixFactor)
-            {
-                EditorGUI.indentLevel++;
-                materialEditor.ShaderProperty(pModel2World,"ワールド変換行列");
+                shaderTagCullingFactor = Foldout("Culling Setting",shaderTagCullingFactor, EditorGUI.indentLevel);
+                if(shaderTagCullingFactor)
+                {
                     EditorGUI.indentLevel++;
-                    materialEditor.VectorProperty(pModelRot,"回転");
-                    materialEditor.VectorProperty(pModelScale,"拡大");
-                    materialEditor.VectorProperty(pModelPos,"移動");
+                    materialEditor.ShaderProperty(pCullMode,"BassPass Culling");
+                    materialEditor.ShaderProperty(pOutlineCullMode,"OutlinePass Culling");
+                    materialEditor.ShaderProperty(pBloomCullMode,"BloomPass Culling");
+                    EditorGUILayout.Space();
+                    materialEditor.ShaderProperty(pMirrorCulling,"Mirror Culling");
+                    materialEditor.ShaderProperty(pCameraCulling,"VRChat Camera Culling");
+                    addvanceCullingFactor = Foldout("Culling Advanced Setting",addvanceCullingFactor, EditorGUI.indentLevel);
+                    if(addvanceCullingFactor)
+                    {
+                        EditorGUI.indentLevel++;
+                        materialEditor.ShaderProperty(pBaseMirrorCulling,"BassPass MirrorCulling");
+                        materialEditor.ShaderProperty(pBaseCameraCulling,"BasePass CameraCulling");
+                        materialEditor.ShaderProperty(pAddMirrorCulling,"AddPass MirrorCulling");
+                        materialEditor.ShaderProperty(pAddCameraCulling,"AddPass CameraCulling");
+                        materialEditor.ShaderProperty(pShadowMirrorCulling,"ShadowPass MirrorCulling");
+                        materialEditor.ShaderProperty(pShadowCameraCulling,"ShadowPass CameraCulling");
+                        materialEditor.ShaderProperty(pBloomMirrorCulling,"BloomPass MirrorCulling");
+                        materialEditor.ShaderProperty(pBloomCameraCulling,"BloomPass CameraCulling");
+                        materialEditor.VectorProperty(pCameraResolution,"Camera Resolution");
+                        EditorGUI.indentLevel--;
+                    }
                     EditorGUI.indentLevel--;
-                materialEditor.ShaderProperty(pWorld2View,"ビュー変換行列");
+                    EditorGUILayout.LabelField("Distance Fade", EditorStyles.boldLabel);
                     EditorGUI.indentLevel++;
-                    materialEditor.VectorProperty(pCameraRot,"回転");
-                    materialEditor.VectorProperty(pCameraScale,"拡大");
-                    materialEditor.VectorProperty(pCameraPos,"移動");
-                    EditorGUI.indentLevel--;
-                materialEditor.ShaderProperty(pBillBoard,"ビルボード行列");
-                if(pBillBoard.floatValue==1){
-                    EditorGUI.indentLevel++;
-                    materialEditor.VectorProperty(pBillBoardRot,"回転");
-                    materialEditor.VectorProperty(pBillBoardScale,"拡大");
-                    materialEditor.VectorProperty(pBillBoardPos,"移動");
+                    materialEditor.FloatProperty(pNearClip,"NearClip");
+                    materialEditor.FloatProperty(pFarClip,"FarClip");
+                    materialEditor.RangeProperty(pClipThreshold,"Threshold");
                     EditorGUI.indentLevel--;
                 }
+            }}
+
+            mainFactor = Foldout( "Texture", mainFactor);
+            if(mainFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.TexturePropertySingleLine(new GUIContent("MainTexture"), pMainTex, pColor);
+                materialEditor.TextureScaleOffsetProperty(pMainTex);
+            }}
+
+            maintexFactor = Foldout( "MainTexture Factor", maintexFactor);
+            if(maintexFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.VectorProperty(pUVScroll,"UV Scroll");
+                materialEditor.TexturePropertySingleLine(new GUIContent("Right Eye Texture"),pReflectionTex0,pMirrorMode);
+                materialEditor.TexturePropertySingleLine(new GUIContent("Left Eye Texture"),pReflectionTex1);
+                materialEditor.TexturePropertySingleLine(new GUIContent("Sub Texture"), pSubTex, pSubColor);
+                materialEditor.TexturePropertySingleLine(new GUIContent("Shadow Texture"),pShadowTex,pShadowTextureLevel);
+                materialEditor.TexturePropertySingleLine(new GUIContent("Back Texture"),pBackTex,pBackTextureLevel);
+                materialEditor.TexturePropertySingleLine(new GUIContent("Toon Map"),pToonMask,pToon);
+                materialEditor.TexturePropertySingleLine(new GUIContent("Alpha Mask"),pAlphaMask,pAlphaMaskLevel);
+                materialEditor.TexturePropertySingleLine(new GUIContent("Disolve Mask"),pDisolveMask,pDisolveSpeed);
+                EditorGUILayout.Space();
+                materialEditor.RangeProperty(pVertexColorMultiple,"Vertex Color");
+                hsvExchangeFactor = Foldout( "HSV Exchange", hsvExchangeFactor, EditorGUI.indentLevel);
+                if(hsvExchangeFactor)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.ShaderProperty(pHSVPosMask,"ModelPosMask");
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Mask"),pHSVMask);
+                    materialEditor.RangeProperty(pColorStepFactor,"Color Step Filter");
+                    materialEditor.RangeProperty(pH,"H");
+                    materialEditor.RangeProperty(pS,"S");
+                    materialEditor.RangeProperty(pV,"V");
+                    hsvExchangeColor = Foldout( "Color 2 Exchange", hsvExchangeColor, EditorGUI.indentLevel);
+                    if(hsvExchangeColor)
+                    {
+                        EditorGUI.indentLevel++;
+                        materialEditor.ColorProperty(pExchangeColor,"Sample Color");
+                        materialEditor.RangeProperty(pExchangeThreshold,"Allowable Error");
+                        EditorGUI.indentLevel--;
+                    }
+                    EditorGUI.indentLevel--;
+                }
+                overlayTextureFactor = Foldout( "Texture Mask", overlayTextureFactor, EditorGUI.indentLevel);
+                if(overlayTextureFactor)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.ShaderProperty(pOverridePosMask,"ModelPosMask");
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Override Texture"),pOverrideTexture,pOverrideColor);
+                    materialEditor.TextureScaleOffsetProperty(pOverrideTexture);
+                    materialEditor.RangeProperty(pOverrideH,"H");
+                    materialEditor.RangeProperty(pOverrideS,"S");
+                    materialEditor.RangeProperty(pOverrideV,"V");
+                    EditorGUI.indentLevel--;
+                }
+            }}
+
+            grabPassFactor = Foldout("GrabPass", grabPassFactor);
+            if(grabPassFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                EditorGUI.indentLevel++;
+                materialEditor.ShaderProperty(pAlpha2Grab,"Alpha 2 Grab");
+                materialEditor.RangeProperty(pGrabBlend,"Blend");
+                materialEditor.RangeProperty(pGrabAdd,"Add");
+                materialEditor.RangeProperty(pGrabMul,"Multiply");
+                materialEditor.RangeProperty(pRelativeRefractionIndex,"Refractive Index");
+                materialEditor.RangeProperty(pRefractDistance,"Distance");
+                materialEditor.RangeProperty(pGrabMosicFactor,"Mosaic Filter");
+                materialEditor.RangeProperty(pGrabColorStepFactor,"Color Step Filter");
+                materialEditor.RangeProperty(pGrabH,"H");
+                materialEditor.RangeProperty(pGrabS,"S");
+                materialEditor.RangeProperty(pGrabV,"V");
+                materialEditor.VectorProperty(pChromaticAberrationR,"Red Chromatic Aberration");
+                materialEditor.VectorProperty(pChromaticAberrationG,"Green Chromatic Aberration");
+                materialEditor.VectorProperty(pChromaticAberrationB,"Blue Chromatic Aberration");
                 EditorGUI.indentLevel--;
-            }
-        }}
+            }}
 
-        fakebloomFactor = Foldout( "フェイクブルーム", fakebloomFactor);
-        if(fakebloomFactor){using (new EditorGUILayout.VerticalScope("box"))
-        {
-            materialEditor.ShaderProperty(pBloomZWrite,"ZWrite");
-            //materialEditor.ShaderProperty(pBloomDstBlend,"DstBlend");
-            materialEditor.ShaderProperty(pBloomBase,"ベース");
-
-            //materialEditor.ShaderProperty(pBloomDstBlend,"ブレンドモード");
-            materialEditor.TexturePropertySingleLine(new GUIContent("マスク"),pBloomMask);
-            materialEditor.ShaderProperty(pFurSaturate,"メインテクスチャノーマライズ");
-            materialEditor.ShaderProperty(pFurNoise,"ノイズ");
-
-            materialEditor.ShaderProperty(pBloomCullMode,"カリングモード");
-            BloomBlendMode bb_mode = (BloomBlendMode)this.bloomBlendProp.floatValue;
-            EditorGUI.BeginChangeCheck();
-            bb_mode = (BloomBlendMode)EditorGUILayout.Popup("モード", (int)bb_mode, Enum.GetNames(typeof(BloomBlendMode)));
-            if (EditorGUI.EndChangeCheck()) {
-                this.bloomBlendProp.floatValue = (float)bb_mode;
-                foreach (UnityEngine.Object obj in this.bloomBlendProp.targets)
-                    this.SetupBloomBlendMode(obj as Material, bb_mode);
-            }
+            pbrFactor = Foldout( "Lighting", pbrFactor);
+            if(pbrFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                EditorGUI.indentLevel++;
+                materialEditor.TexturePropertySingleLine(new GUIContent("Toon Map"),pToonMask,pToon);
+                materialEditor.TexturePropertySingleLine(new GUIContent("Bump Map"),pBumpMap,pBumpScale);
+                materialEditor.TexturePropertySingleLine(new GUIContent("Metalic/Roughness/Shadow Mask"),pRoughnessMetallicMap);
+                materialEditor.RangeProperty(pMetalic,"Metalic");
+                materialEditor.RangeProperty(pRoughness,"Roughness");
+                virtualLightFactor = Foldout( "Addvanced", virtualLightFactor, EditorGUI.indentLevel);
+                if(virtualLightFactor)
+                {
+                    materialEditor.RangeProperty(pVirtualLight,"Virtual Directional Light");
+                    materialEditor.RangeProperty(pVirtualGI,"Virtual Emviroment Light");
+                    materialEditor.RangeProperty(pLightColorAttenuation,"Light Color Normalize");
+                    materialEditor.RangeProperty(pReceiveShadowRate,"Shadow Power");
+                    materialEditor.RangeProperty(pIndirectLightIntensity,"Emviroment Light Normalize");
+                    materialEditor.RangeProperty(pMaxPointLightEfect,"Point Light Power");
+                    materialEditor.RangeProperty(pLambert,"Half Lambert");
+                    materialEditor.RangeProperty(pFlatShading,"Flat Shading");
+                    materialEditor.RangeProperty(pBloomLightEffect,"Bloom Pass Lighting");
+                }
+                EditorGUI.indentLevel--;
+            }}
             
-            materialEditor.TexturePropertyWithHDRColor(new GUIContent("テクスチャ"), pBloomTex, pBloomCol, new ColorPickerHDRConfig(0, 100, 0.01f, 3.0f), false);
-            materialEditor.TextureScaleOffsetProperty(pBloomTex);
-            materialEditor.RangeProperty(pBloomMainTexBlend,"テクスチャブレンド");
-            materialEditor.RangeProperty(pBloomRange,"長さ");
-            materialEditor.RangeProperty(pBloomBrightness,"明るさ");
-            materialEditor.RangeProperty(pBloomKnee,"Knee");
-            materialEditor.RangeProperty(pBloomSoftknee,"SoftKnee");
-            materialEditor.RangeProperty(pBloomThreshold,"Threshold");
-            materialEditor.RangeProperty(pFurWindPower,"風の強さ");
-            materialEditor.RangeProperty(pFurWindSpeed,"風のスピード");
-            materialEditor.RangeProperty(pFurWindType,"風のタイプ");
-            materialEditor.VectorProperty(pFurGravity,"重力");
-            materialEditor.RangeProperty(pBloomLightEffect,"ブルームパスへのライトの影響");
-        }}
+            toonFactor = Foldout( "PBR 2 Toon",toonFactor);
+            if(toonFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.TexturePropertySingleLine(new GUIContent("Toon Map"),pToonMask,pToon);
+                materialEditor.TexturePropertySingleLine(new GUIContent("Custom Shadow"),pShadeColor);
+                materialEditor.ColorProperty(pShadeColor0,"Shadow 1 Color");
+                materialEditor.RangeProperty(pShadeShift0,"Shadow 1 Shift");
+                materialEditor.RangeProperty(pShadeToony0,"Shadow 1 Toony");
+                materialEditor.ColorProperty(pShadeColor1,"Shadow 2 Color");
+                materialEditor.RangeProperty(pShadeShift1,"Shadow 2 Shift");
+                materialEditor.RangeProperty(pShadeToony1,"Shadow 2 Toony");
+                materialEditor.TexturePropertySingleLine(new GUIContent("Shadow Texture"),pShadowTex,pShadowTextureLevel);
+            }}
 
-        noiseGeneratoFactor = Foldout( "ノイズ", noiseGeneratoFactor);
-        if(noiseGeneratoFactor){using (new EditorGUILayout.VerticalScope("box"))
-        {
-            materialEditor.ShaderProperty(pNOISE_GENERATE,"ノイズ生成");
-            materialEditor.ShaderProperty(pFBM,"FBMノイズ");
-            materialEditor.ShaderProperty(pNoiseMode,"ノイズモード");
-            materialEditor.VectorProperty(pNoise_ST,"ノイズスケール");
-            materialEditor.VectorProperty(pNoiseScroll,"スクロール");
-        }}
+            fresnelFactor = Foldout("Matcap & RimLight",fresnelFactor);
+            if(fresnelFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.TexturePropertySingleLine(new GUIContent("Mask"),pFresnelMask);
+                EditorGUILayout.LabelField("RimLight", EditorStyles.boldLabel);
+                EditorGUI.indentLevel++;
+                    materialEditor.ColorProperty(pRimColor,"Rim Color");
+                    materialEditor.RangeProperty(pRimLift,"Rim Shift");
+                    materialEditor.RangeProperty(pRimPower,"Rim Power");
+                    materialEditor.RangeProperty(pRimFresnel,"Fresnel");
+                    materialEditor.RangeProperty(pRimFresnelPower,"Fresnel Power");
+                EditorGUI.indentLevel--;
+                EditorGUILayout.LabelField("Matcap", EditorStyles.boldLabel);
+                EditorGUI.indentLevel++;
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Matcap Texture"),pMatCap,pMatCapColor,pMatcapMode);
+                EditorGUI.indentLevel--;
+            }}
+
+            outlineFactor = Foldout( "Outline", outlineFactor);
+            if(outlineFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.ShaderProperty(pOutlineBase,"Outline Mode");
+                materialEditor.TexturePropertySingleLine(new GUIContent("Mask"), pOutlineMask);
+                materialEditor.FloatProperty(pOutlineWidth,"Outline Width");
+                materialEditor.TexturePropertySingleLine(new GUIContent("Outline Texture"),pOutlineTex,pOutlineColor);
+                materialEditor.RangeProperty(pOutlineMainTexBlend,"MainTexture Blend");
+            }}
+
+            emissionFactor = Foldout( "Emission", emissionFactor);
+            if(emissionFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.TexturePropertySingleLine(new GUIContent("Mask"), pEmissionMask);
+                materialEditor.TexturePropertyWithHDRColor(new GUIContent("Emission Texture"), pEmissionTex, pEmissionColor, new ColorPickerHDRConfig(0, 100, 0.01f, 3.0f), false);
+                materialEditor.TextureScaleOffsetProperty(pEmissionTex);
+                materialEditor.VectorProperty(pEmissionVelocity,"Emissive Scroll(w→speed)");
+                materialEditor.VectorProperty(pEmissionScroll,"Texture Scroll");
+                materialEditor.RangeProperty(pEmissionWidth,"Emissive Width");
+            }}
+            
+            wireframeFactor = Foldout( "Wire Frame", wireframeFactor);
+            if(wireframeFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.ColorProperty(pWireframeColor,"Color");
+                materialEditor.RangeProperty(pWireframeBlend,"MainTexture Blend");
+                materialEditor.RangeProperty(pWireframeWidth,"Width");
+            }}
+
+            parallaxFactor = Foldout( "Parallax Mapping", parallaxFactor);
+            if(parallaxFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.ShaderProperty(pAlpha2Parallax,"Alpha 2 Parallax");
+                materialEditor.TexturePropertySingleLine(new GUIContent("Mask"),pParallaxMask);
+                materialEditor.TexturePropertySingleLine(new GUIContent("Parallax Texture"),pParallaxTexture,pParallaxColor);
+                materialEditor.VectorProperty(pParallaxScroll,"Texture Scroll");
+                materialEditor.FloatProperty(pParallaxDepth,"Depth");
+                materialEditor.RangeProperty(pParallaxBlend,"Blend");
+                materialEditor.RangeProperty(pParallaxAdd,"Add");
+                materialEditor.RangeProperty(pParallaxMul,"Multiply");
+            }}
+
+            geometryFactor = Foldout( "Vertex Shader", geometryFactor);
+            if(geometryFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.TexturePropertySingleLine(new GUIContent("Vertex Position Memory"), pPositionMemory,pPositionPower);
+                materialEditor.TextureScaleOffsetProperty(pPositionMemory);
+                materialEditor.VectorProperty(pMemoryScroll,"Memory Scroll");
+                materialEditor.RangeProperty(pPositionFactor,"Polygon or Vertex Bass");
+                materialEditor.RangeProperty(pExtrusionFactor,"Extrusion Factor");
+                materialEditor.RangeProperty(pExtrusionNoise,"Extrusion Noise");
+                materialEditor.VectorProperty(pGrabity,"Grabity");
+                materialEditor.RangeProperty(pRotationFactor,"Rotation Factor");
+                materialEditor.RangeProperty(pRotationNoise,"Rotation Noise");
+                materialEditor.RangeProperty(pScaleFactor,"Scale Factor");
+                materialEditor.RangeProperty(pScaleNoise,"Scale Noise");
+
+                doppelgengerFactor = Foldout( "Doppelgenger", doppelgengerFactor, EditorGUI.indentLevel);
+                if(doppelgengerFactor)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.ShaderProperty(pIS_DOPPELGENGER,"Doppelgenger");
+                    if(pIS_DOPPELGENGER.floatValue==1){
+                        materialEditor.ShaderProperty(pDoppelganger,"Doppelgenger Num");
+                        materialEditor.VectorProperty(pDoppelgangerPos,"Doppelgenger Vec");
+                    }
+                    EditorGUI.indentLevel--;
+                }
+
+                gpupFactor = Foldout( "GPU Particle", gpupFactor, EditorGUI.indentLevel);
+                if(gpupFactor)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.RangeProperty(pParticleFactor,"Particle Factor");
+                    materialEditor.ColorProperty(pParticleColor,"Color");
+                    materialEditor.RangeProperty(pParticleColorFactor,"Texture Blend");
+                    materialEditor.RangeProperty(pParticleSize,"Size");
+                    if(pNOISE_GENERATE.floatValue==1) materialEditor.RangeProperty(pPositionNoise,"Noise");
+                    materialEditor.RangeProperty(pObjPosFactor,"Object Position Factor");
+                    materialEditor.RangeProperty(pObjPosNoise,"Object Position Noise");
+                    EditorGUI.indentLevel--;
+                }
+                matrixFactor = Foldout( "Transformation MATRIX", matrixFactor, EditorGUI.indentLevel);
+                if(matrixFactor)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.ShaderProperty(pModel2World,"Model2World");
+                        EditorGUI.indentLevel++;
+                        materialEditor.VectorProperty(pModelRot,"Rot");
+                        materialEditor.VectorProperty(pModelScale,"Scale");
+                        materialEditor.VectorProperty(pModelPos,"Pos");
+                        EditorGUI.indentLevel--;
+                    materialEditor.ShaderProperty(pWorld2View,"World2View");
+                        EditorGUI.indentLevel++;
+                        materialEditor.VectorProperty(pCameraRot,"Rot");
+                        materialEditor.VectorProperty(pCameraScale,"Scale");
+                        materialEditor.VectorProperty(pCameraPos,"Pos");
+                        EditorGUI.indentLevel--;
+                    materialEditor.ShaderProperty(pBillBoard,"Billbord");
+                    if(pBillBoard.floatValue==1){
+                        EditorGUI.indentLevel++;
+                        materialEditor.VectorProperty(pBillBoardRot,"Rot");
+                        materialEditor.VectorProperty(pBillBoardScale,"Scale");
+                        materialEditor.VectorProperty(pBillBoardPos,"Pos");
+                        EditorGUI.indentLevel--;
+                    }
+                    EditorGUI.indentLevel--;
+                }
+            }}
+
+            fakebloomFactor = Foldout( "Fake Bloom", fakebloomFactor);
+            if(fakebloomFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.ShaderProperty(pBloomZWrite,"ZWrite");
+                //materialEditor.ShaderProperty(pBloomDstBlend,"DstBlend");
+                materialEditor.ShaderProperty(pBloomBase,"Bloom Base");
+
+                //materialEditor.ShaderProperty(pBloomDstBlend,"ブレンドモード");
+                materialEditor.TexturePropertySingleLine(new GUIContent("Mask"),pBloomMask);
+                materialEditor.ShaderProperty(pFurSaturate,"MainTexture Normalize");
+                //materialEditor.ShaderProperty(pFurNoise,"Noise");
+
+                materialEditor.ShaderProperty(pBloomCullMode,"Culling Mode");
+                BloomBlendMode bb_mode = (BloomBlendMode)this.bloomBlendProp.floatValue;
+                EditorGUI.BeginChangeCheck();
+                bb_mode = (BloomBlendMode)EditorGUILayout.Popup("Mode", (int)bb_mode, Enum.GetNames(typeof(BloomBlendMode)));
+                if (EditorGUI.EndChangeCheck()) {
+                    this.bloomBlendProp.floatValue = (float)bb_mode;
+                    foreach (UnityEngine.Object obj in this.bloomBlendProp.targets)
+                        this.SetupBloomBlendMode(obj as Material, bb_mode);
+                }
+                
+                materialEditor.TexturePropertyWithHDRColor(new GUIContent("Bloom Texture"), pBloomTex, pBloomCol, new ColorPickerHDRConfig(0, 100, 0.01f, 3.0f), false);
+                materialEditor.TextureScaleOffsetProperty(pBloomTex);
+                materialEditor.RangeProperty(pBloomMainTexBlend,"MainTexture Blend");
+                materialEditor.RangeProperty(pBloomRange,"Range");
+                materialEditor.RangeProperty(pBloomBrightness,"Brightness");
+                materialEditor.RangeProperty(pBloomKnee,"Knee");
+                materialEditor.RangeProperty(pBloomSoftknee,"SoftKnee");
+                materialEditor.RangeProperty(pBloomThreshold,"Threshold");
+                materialEditor.RangeProperty(pFurWindPower,"WindPower");
+                materialEditor.RangeProperty(pFurWindSpeed,"WindSpeed");
+                materialEditor.RangeProperty(pFurWindType,"WindType");
+                materialEditor.VectorProperty(pFurGravity,"Gravity");
+                materialEditor.RangeProperty(pBloomLightEffect,"Bloom Pass Lighting");
+            }}
+
+            noiseGeneratoFactor = Foldout( "Noise (Don't Touch)", noiseGeneratoFactor);
+            if(noiseGeneratoFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.ShaderProperty(pNOISE_GENERATE,"Noise Generate (DON'T PANIC)");
+                materialEditor.ShaderProperty(pFBM,"FBM");
+                materialEditor.ShaderProperty(pNoiseMode,"Noise Mode");
+                materialEditor.VectorProperty(pNoise_ST,"Noise Scale");
+                materialEditor.VectorProperty(pNoiseScroll,"Noise Scroll");
+            }}
+        }else{
+            shaderTagFactor = Foldout( "シェーダータグ", shaderTagFactor);
+            if(shaderTagFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                BlendMode b_mode = (BlendMode)this.blendProp.floatValue;
+                StencilMode s_mode = (StencilMode)this.stencilProp.floatValue;
+                EditorGUI.BeginChangeCheck();
+                b_mode = (BlendMode)EditorGUILayout.Popup("ブレンドモード", (int)b_mode, Enum.GetNames(typeof(BlendMode)));
+                if (EditorGUI.EndChangeCheck()) {
+                    this.blendProp.floatValue = (float)b_mode;
+                    foreach (UnityEngine.Object obj in this.blendProp.targets)
+                        this.SetupBlendMode(obj as Material, b_mode, s_mode);
+                }
+
+                materialEditor.RangeProperty(pAlphaCut,"アルファカットアウト");
+
+                EditorGUILayout.Space();
+                
+                EditorGUI.BeginChangeCheck();
+                s_mode = (StencilMode)EditorGUILayout.Popup("ステンシルモード", (int)s_mode, Enum.GetNames(typeof(StencilMode)));
+                if (EditorGUI.EndChangeCheck()) {
+                    this.stencilProp.floatValue = (float)s_mode;
+                    foreach (UnityEngine.Object obj in this.stencilProp.targets)
+                        this.SetupStencilMode(obj as Material,b_mode, s_mode);
+                }
+                materialEditor.ShaderProperty(pStencil,"ステンシル値");
+
+                EditorGUILayout.Space();
+
+                materialEditor.TexturePropertySingleLine(new GUIContent("テッセレーション"),pTessMap,pTessFactor);
+                materialEditor.RenderQueueField();
+
+                shaderTagStencillactor = Foldout( "ステンシル設定", shaderTagStencillactor, EditorGUI.indentLevel);
+                if(shaderTagStencillactor)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.ShaderProperty(pStencil,"ステンシル値");
+                    materialEditor.ShaderProperty(pReadMask,"ReadMask");
+                    materialEditor.ShaderProperty(pWriteMask,"WriteMask");
+                    materialEditor.ShaderProperty(pStencilComp,"ステンシル値テスト");
+                    materialEditor.ShaderProperty(pStencilPass,"合格");
+                    materialEditor.ShaderProperty(pStencilFail,"不合格");
+                    materialEditor.ShaderProperty(pStencilZFail,"ZTest不合格");
+                    EditorGUI.indentLevel--;
+                }
+
+                shaderTagBlendFactor = Foldout( "ブレンド設定", shaderTagBlendFactor, EditorGUI.indentLevel);
+                if(shaderTagBlendFactor)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.ShaderProperty(pSrcBlend,"ベースパス SrcBlend");
+                    materialEditor.ShaderProperty(pDstBlend,"ベースパス DstBlend");
+                    materialEditor.ShaderProperty(pBloomSrcBlend,"ブルーム SrcBlend");
+                    materialEditor.ShaderProperty(pBloomDstBlend,"ブルーム DstBlend");
+                    materialEditor.ShaderProperty(pZWrite,"ZWrite");
+                    materialEditor.ShaderProperty(pZTest,"ZTest");
+                    materialEditor.ShaderProperty(pBloomZWrite,"ブルーム ZWrite");
+                    EditorGUI.indentLevel--;
+                }
+                shaderTagCullingFactor = Foldout("カリング設定",shaderTagCullingFactor, EditorGUI.indentLevel);
+                if(shaderTagCullingFactor)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.ShaderProperty(pCullMode,"ベースパス カリング");
+                    materialEditor.ShaderProperty(pOutlineCullMode,"アウトライン カリング");
+                    materialEditor.ShaderProperty(pBloomCullMode,"ブルーム カリング");
+                    EditorGUILayout.Space();
+                    materialEditor.ShaderProperty(pMirrorCulling,"ミラーカリング");
+                    materialEditor.ShaderProperty(pCameraCulling,"カメラカリング");
+                    addvanceCullingFactor = Foldout("詳細",addvanceCullingFactor, EditorGUI.indentLevel);
+                    if(addvanceCullingFactor)
+                    {
+                        EditorGUI.indentLevel++;
+                        materialEditor.ShaderProperty(pBaseMirrorCulling,"ベースパス ミラーカリング");
+                        materialEditor.ShaderProperty(pBaseCameraCulling,"ベースパス カメラカリング");
+                        materialEditor.ShaderProperty(pAddMirrorCulling,"ポイントライトパス ミラーカリング");
+                        materialEditor.ShaderProperty(pAddCameraCulling,"ポイントライトパス カメラカリング");
+                        materialEditor.ShaderProperty(pShadowMirrorCulling,"シャドウパス ミラーカリング");
+                        materialEditor.ShaderProperty(pShadowCameraCulling,"シャドウパス カメラカリング");
+                        materialEditor.ShaderProperty(pBloomMirrorCulling,"ブルームパス ミラーカリング");
+                        materialEditor.ShaderProperty(pBloomCameraCulling,"ブルームパス カメラカリング");
+                        materialEditor.VectorProperty(pCameraResolution,"カメラ解像度");
+                        EditorGUI.indentLevel--;
+                    }
+                    EditorGUI.indentLevel--;
+                    EditorGUILayout.LabelField("DistanceFade", EditorStyles.boldLabel);
+                    EditorGUI.indentLevel++;
+                    materialEditor.FloatProperty(pNearClip,"NearClip");
+                    materialEditor.FloatProperty(pFarClip,"FarClip");
+                    materialEditor.RangeProperty(pClipThreshold,"ノイズ");
+                    EditorGUI.indentLevel--;
+                }
+            }}
+
+            mainFactor = Foldout( "メインテクスチャ", mainFactor);
+            if(mainFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.TexturePropertySingleLine(new GUIContent("メインテクスチャ"), pMainTex, pColor);
+                materialEditor.TextureScaleOffsetProperty(pMainTex);
+            }}
+
+            maintexFactor = Foldout( "メインテクスチャ ファクター", maintexFactor);
+            if(maintexFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.VectorProperty(pUVScroll,"UVスクロール");
+                materialEditor.TexturePropertySingleLine(new GUIContent("右目テクスチャ"),pReflectionTex0,pMirrorMode);
+                materialEditor.TexturePropertySingleLine(new GUIContent("左目テクスチャ"),pReflectionTex1);
+                materialEditor.TexturePropertySingleLine(new GUIContent("サブテクスチャ"), pSubTex, pSubColor);
+                materialEditor.TexturePropertySingleLine(new GUIContent("影にテクスチャをブレンド"),pShadowTex,pShadowTextureLevel);
+                materialEditor.TexturePropertySingleLine(new GUIContent("裏面にテクスチャをブレンド"),pBackTex,pBackTextureLevel);
+                materialEditor.TexturePropertySingleLine(new GUIContent("トゥーンマップ"),pToonMask,pToon);
+                materialEditor.TexturePropertySingleLine(new GUIContent("アルファマスクレベル"),pAlphaMask,pAlphaMaskLevel);
+                materialEditor.TexturePropertySingleLine(new GUIContent("ディゾルブスピードレベル"),pDisolveMask,pDisolveSpeed);
+                EditorGUILayout.Space();
+                materialEditor.RangeProperty(pVertexColorMultiple,"頂点カラー");
+                hsvExchangeFactor = Foldout( "色変換", hsvExchangeFactor, EditorGUI.indentLevel);
+                if(hsvExchangeFactor)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.ShaderProperty(pHSVPosMask,"モデル座標マスク");
+                    materialEditor.TexturePropertySingleLine(new GUIContent("マスク"),pHSVMask);
+                    materialEditor.RangeProperty(pColorStepFactor,"イラスト風");
+                    materialEditor.RangeProperty(pH,"H");
+                    materialEditor.RangeProperty(pS,"S");
+                    materialEditor.RangeProperty(pV,"V");
+                    hsvExchangeColor = Foldout( "色サンプルから変換", hsvExchangeColor, EditorGUI.indentLevel);
+                    if(hsvExchangeColor)
+                    {
+                        EditorGUI.indentLevel++;
+                        materialEditor.ColorProperty(pExchangeColor,"サンプル");
+                        materialEditor.RangeProperty(pExchangeThreshold,"許容誤差");
+                        EditorGUI.indentLevel--;
+                    }
+                    EditorGUI.indentLevel--;
+                }
+                overlayTextureFactor = Foldout( "テクスチャ上書き", overlayTextureFactor, EditorGUI.indentLevel);
+                if(overlayTextureFactor)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.ShaderProperty(pOverridePosMask,"モデル座標マスク");
+                    materialEditor.TexturePropertySingleLine(new GUIContent("テクスチャ"),pOverrideTexture,pOverrideColor);
+                    materialEditor.TextureScaleOffsetProperty(pOverrideTexture);
+                    materialEditor.RangeProperty(pOverrideH,"H");
+                    materialEditor.RangeProperty(pOverrideS,"S");
+                    materialEditor.RangeProperty(pOverrideV,"V");
+                    EditorGUI.indentLevel--;
+                }
+            }}
+
+            grabPassFactor = Foldout("グラブパス", grabPassFactor);
+            if(grabPassFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                EditorGUI.indentLevel++;
+                materialEditor.ShaderProperty(pAlpha2Grab,"透明度をグラブパスにする");
+                materialEditor.RangeProperty(pGrabBlend,"ブレンド");
+                materialEditor.RangeProperty(pGrabAdd,"足し算");
+                materialEditor.RangeProperty(pGrabMul,"掛け算");
+                materialEditor.RangeProperty(pRelativeRefractionIndex,"屈折率");
+                materialEditor.RangeProperty(pRefractDistance,"焦点距離");
+                materialEditor.RangeProperty(pGrabMosicFactor,"モザイク");
+                materialEditor.RangeProperty(pGrabColorStepFactor,"イラスト風");
+                materialEditor.RangeProperty(pGrabH,"H");
+                materialEditor.RangeProperty(pGrabS,"S");
+                materialEditor.RangeProperty(pGrabV,"V");
+                materialEditor.VectorProperty(pChromaticAberrationR,"赤色収差");
+                materialEditor.VectorProperty(pChromaticAberrationG,"緑色収差");
+                materialEditor.VectorProperty(pChromaticAberrationB,"青色収差");
+                EditorGUI.indentLevel--;
+            }}
+
+            pbrFactor = Foldout( "ライティング", pbrFactor);
+            if(pbrFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                EditorGUI.indentLevel++;
+                materialEditor.TexturePropertySingleLine(new GUIContent("トゥーンマップ"),pToonMask,pToon);
+                materialEditor.TexturePropertySingleLine(new GUIContent("ノーマルマップ"),pBumpMap,pBumpScale);
+                materialEditor.TexturePropertySingleLine(new GUIContent("メタリック/ラフネス/シャドウマスク"),pRoughnessMetallicMap);
+                materialEditor.RangeProperty(pMetalic,"メタリック");
+                materialEditor.RangeProperty(pRoughness,"ラフネス");
+                virtualLightFactor = Foldout( "詳細設定", virtualLightFactor, EditorGUI.indentLevel);
+                if(virtualLightFactor)
+                {
+                    materialEditor.RangeProperty(pVirtualLight,"仮想ディレクショナルライト");
+                    materialEditor.RangeProperty(pVirtualGI,"仮想環境光");
+                    materialEditor.RangeProperty(pLightColorAttenuation,"ライト色の平均化");
+                    materialEditor.RangeProperty(pReceiveShadowRate,"影の濃さ");
+                    materialEditor.RangeProperty(pIndirectLightIntensity,"ライト方向の平均化");
+                    materialEditor.RangeProperty(pMaxPointLightEfect,"ポイントライトの影響");
+                    materialEditor.RangeProperty(pLambert,"ハーフ ランバート");
+                    materialEditor.RangeProperty(pFlatShading,"フラットシェーディング");
+                    materialEditor.RangeProperty(pBloomLightEffect,"ブルームパスへのライトの影響");
+                }
+                EditorGUI.indentLevel--;
+            }}
+            
+            toonFactor = Foldout( "トゥーンシェーディング",toonFactor);
+            if(toonFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.TexturePropertySingleLine(new GUIContent("トゥーンマップ"),pToonMask,pToon);
+                materialEditor.TexturePropertySingleLine(new GUIContent("カスタム影色"),pShadeColor);
+                materialEditor.ColorProperty(pShadeColor0,"薄影 色");
+                materialEditor.RangeProperty(pShadeShift0,"薄影 位置");
+                materialEditor.RangeProperty(pShadeToony0,"薄影 ぼかし");
+                materialEditor.ColorProperty(pShadeColor1,"濃影 色");
+                materialEditor.RangeProperty(pShadeShift1,"濃影 位置");
+                materialEditor.RangeProperty(pShadeToony1,"濃影 ぼかし");
+                materialEditor.TexturePropertySingleLine(new GUIContent("影にテクスチャをブレンド"),pShadowTex,pShadowTextureLevel);
+            }}
+
+            fresnelFactor = Foldout("マットキャップとリムライト",fresnelFactor);
+            if(fresnelFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.TexturePropertySingleLine(new GUIContent("マスク"),pFresnelMask);
+                EditorGUILayout.LabelField("リムライト", EditorStyles.boldLabel);
+                EditorGUI.indentLevel++;
+                    materialEditor.ColorProperty(pRimColor,"リムカラー");
+                    materialEditor.RangeProperty(pRimLift,"リムシフト");
+                    materialEditor.RangeProperty(pRimPower,"リムパワー");
+                    materialEditor.RangeProperty(pRimFresnel,"フレネル乗数");
+                    materialEditor.RangeProperty(pRimFresnelPower,"フレネルパワー");
+                EditorGUI.indentLevel--;
+                EditorGUILayout.LabelField("マットキャップ", EditorStyles.boldLabel);
+                EditorGUI.indentLevel++;
+                    materialEditor.TexturePropertySingleLine(new GUIContent("マットキャップ"),pMatCap,pMatCapColor,pMatcapMode);
+                EditorGUI.indentLevel--;
+            }}
+
+            outlineFactor = Foldout( "アウトライン", outlineFactor);
+            if(outlineFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.ShaderProperty(pOutlineBase,"アウトラインモード");
+                materialEditor.TexturePropertySingleLine(new GUIContent("マスク"), pOutlineMask);
+                materialEditor.FloatProperty(pOutlineWidth,"太さ");
+                materialEditor.TexturePropertySingleLine(new GUIContent("テクスチャ"),pOutlineTex,pOutlineColor);
+                materialEditor.RangeProperty(pOutlineMainTexBlend,"テクスチャブレンド");
+            }}
+
+            emissionFactor = Foldout( "エミッション", emissionFactor);
+            if(emissionFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.TexturePropertySingleLine(new GUIContent("マスク"), pEmissionMask);
+                materialEditor.TexturePropertyWithHDRColor(new GUIContent("エミッション"), pEmissionTex, pEmissionColor, new ColorPickerHDRConfig(0, 100, 0.01f, 3.0f), false);
+                materialEditor.TextureScaleOffsetProperty(pEmissionTex);
+                materialEditor.VectorProperty(pEmissionVelocity,"エミッシブスクロール(wは速度)");
+                materialEditor.VectorProperty(pEmissionScroll,"テクスチャスクロール");
+                materialEditor.RangeProperty(pEmissionWidth,"太さ");
+            }}
+            
+            wireframeFactor = Foldout( "ワイヤーフレーム", wireframeFactor);
+            if(wireframeFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.ColorProperty(pWireframeColor,"色");
+                materialEditor.RangeProperty(pWireframeBlend,"テクスチャブレンド");
+                materialEditor.RangeProperty(pWireframeWidth,"太さ");
+            }}
+
+            parallaxFactor = Foldout( "パララックスマッピング", parallaxFactor);
+            if(parallaxFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.ShaderProperty(pAlpha2Parallax,"透明度をパララックスにする");
+                materialEditor.TexturePropertySingleLine(new GUIContent("マスク"),pParallaxMask);
+                materialEditor.TexturePropertySingleLine(new GUIContent("パララックステクスチャ"),pParallaxTexture,pParallaxColor);
+                materialEditor.VectorProperty(pParallaxScroll,"スクロール");
+                materialEditor.FloatProperty(pParallaxDepth,"深さ");
+                materialEditor.RangeProperty(pParallaxBlend,"ブレンド");
+                materialEditor.RangeProperty(pParallaxAdd,"足し算");
+                materialEditor.RangeProperty(pParallaxMul,"掛け算");
+            }}
+
+            geometryFactor = Foldout( "頂点シェーダー", geometryFactor);
+            if(geometryFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.TexturePropertySingleLine(new GUIContent("メモリ"), pPositionMemory,pPositionPower);
+                materialEditor.TextureScaleOffsetProperty(pPositionMemory);
+                materialEditor.VectorProperty(pMemoryScroll,"スクロール");
+                materialEditor.RangeProperty(pPositionFactor,"ポリゴンベースか頂点ベースか");
+                materialEditor.RangeProperty(pExtrusionFactor,"爆発");
+                materialEditor.RangeProperty(pExtrusionNoise,"爆発ノイズ");
+                materialEditor.VectorProperty(pGrabity,"重力");
+                materialEditor.RangeProperty(pRotationFactor,"回転");
+                materialEditor.RangeProperty(pRotationNoise,"回転ノイズ");
+                materialEditor.RangeProperty(pScaleFactor,"スケール");
+                materialEditor.RangeProperty(pScaleNoise,"スケールノイズ");
+
+                doppelgengerFactor = Foldout( "分身", doppelgengerFactor, EditorGUI.indentLevel);
+                if(doppelgengerFactor)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.ShaderProperty(pIS_DOPPELGENGER,"ドッペルゲンガー");
+                    if(pIS_DOPPELGENGER.floatValue==1){
+                        materialEditor.ShaderProperty(pDoppelganger,"分身数");
+                        materialEditor.VectorProperty(pDoppelgangerPos,"分身方向");
+                    }
+                    EditorGUI.indentLevel--;
+                }
+
+                gpupFactor = Foldout( "GPUパーティクル", gpupFactor, EditorGUI.indentLevel);
+                if(gpupFactor)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.RangeProperty(pParticleFactor,"パーティクルファクター");
+                    materialEditor.ColorProperty(pParticleColor,"カラー");
+                    materialEditor.RangeProperty(pParticleColorFactor,"テクスチャブレンド");
+                    materialEditor.RangeProperty(pParticleSize,"サイズ");
+                    if(pNOISE_GENERATE.floatValue==1) materialEditor.RangeProperty(pPositionNoise,"ノイズ");
+                    materialEditor.RangeProperty(pObjPosFactor,"オブジェクトポジションファクター");
+                    materialEditor.RangeProperty(pObjPosNoise,"ファクターノイズ");
+                    EditorGUI.indentLevel--;
+                }
+                matrixFactor = Foldout( "変換行列", matrixFactor, EditorGUI.indentLevel);
+                if(matrixFactor)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.ShaderProperty(pModel2World,"ワールド変換行列");
+                        EditorGUI.indentLevel++;
+                        materialEditor.VectorProperty(pModelRot,"回転");
+                        materialEditor.VectorProperty(pModelScale,"拡大");
+                        materialEditor.VectorProperty(pModelPos,"移動");
+                        EditorGUI.indentLevel--;
+                    materialEditor.ShaderProperty(pWorld2View,"ビュー変換行列");
+                        EditorGUI.indentLevel++;
+                        materialEditor.VectorProperty(pCameraRot,"回転");
+                        materialEditor.VectorProperty(pCameraScale,"拡大");
+                        materialEditor.VectorProperty(pCameraPos,"移動");
+                        EditorGUI.indentLevel--;
+                    materialEditor.ShaderProperty(pBillBoard,"ビルボード行列");
+                    if(pBillBoard.floatValue==1){
+                        EditorGUI.indentLevel++;
+                        materialEditor.VectorProperty(pBillBoardRot,"回転");
+                        materialEditor.VectorProperty(pBillBoardScale,"拡大");
+                        materialEditor.VectorProperty(pBillBoardPos,"移動");
+                        EditorGUI.indentLevel--;
+                    }
+                    EditorGUI.indentLevel--;
+                }
+            }}
+
+            fakebloomFactor = Foldout( "フェイクブルーム", fakebloomFactor);
+            if(fakebloomFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.ShaderProperty(pBloomZWrite,"ZWrite");
+                //materialEditor.ShaderProperty(pBloomDstBlend,"DstBlend");
+                materialEditor.ShaderProperty(pBloomBase,"ベース");
+
+                //materialEditor.ShaderProperty(pBloomDstBlend,"ブレンドモード");
+                materialEditor.TexturePropertySingleLine(new GUIContent("マスク"),pBloomMask);
+                materialEditor.ShaderProperty(pFurSaturate,"メインテクスチャノーマライズ");
+                materialEditor.ShaderProperty(pFurNoise,"ノイズ");
+
+                materialEditor.ShaderProperty(pBloomCullMode,"カリングモード");
+                BloomBlendMode bb_mode = (BloomBlendMode)this.bloomBlendProp.floatValue;
+                EditorGUI.BeginChangeCheck();
+                bb_mode = (BloomBlendMode)EditorGUILayout.Popup("モード", (int)bb_mode, Enum.GetNames(typeof(BloomBlendMode)));
+                if (EditorGUI.EndChangeCheck()) {
+                    this.bloomBlendProp.floatValue = (float)bb_mode;
+                    foreach (UnityEngine.Object obj in this.bloomBlendProp.targets)
+                        this.SetupBloomBlendMode(obj as Material, bb_mode);
+                }
+                
+                materialEditor.TexturePropertyWithHDRColor(new GUIContent("テクスチャ"), pBloomTex, pBloomCol, new ColorPickerHDRConfig(0, 100, 0.01f, 3.0f), false);
+                materialEditor.TextureScaleOffsetProperty(pBloomTex);
+                materialEditor.RangeProperty(pBloomMainTexBlend,"テクスチャブレンド");
+                materialEditor.RangeProperty(pBloomRange,"長さ");
+                materialEditor.RangeProperty(pBloomBrightness,"明るさ");
+                materialEditor.RangeProperty(pBloomKnee,"Knee");
+                materialEditor.RangeProperty(pBloomSoftknee,"SoftKnee");
+                materialEditor.RangeProperty(pBloomThreshold,"Threshold");
+                materialEditor.RangeProperty(pFurWindPower,"風の強さ");
+                materialEditor.RangeProperty(pFurWindSpeed,"風のスピード");
+                materialEditor.RangeProperty(pFurWindType,"風のタイプ");
+                materialEditor.VectorProperty(pFurGravity,"重力");
+                materialEditor.RangeProperty(pBloomLightEffect,"ブルームパスへのライトの影響");
+            }}
+
+            noiseGeneratoFactor = Foldout( "ノイズ", noiseGeneratoFactor);
+            if(noiseGeneratoFactor){using (new EditorGUILayout.VerticalScope("box"))
+            {
+                materialEditor.ShaderProperty(pNOISE_GENERATE,"ノイズ生成(超重い)");
+                materialEditor.ShaderProperty(pFBM,"FBMノイズ");
+                materialEditor.ShaderProperty(pNoiseMode,"ノイズモード");
+                materialEditor.VectorProperty(pNoise_ST,"ノイズスケール");
+                materialEditor.VectorProperty(pNoiseScroll,"スクロール");
+            }}
+        }
 
         settingFactor = Foldout( "レガシーセッティング",settingFactor);
         if(settingFactor)
