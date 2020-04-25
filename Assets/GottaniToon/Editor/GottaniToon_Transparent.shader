@@ -745,14 +745,14 @@ SubShader
 					float parallaxMask;
 					{
 						fixed4 mask = UNITY_SAMPLE_TEX2D_SAMPLER(_ParallaxMask,_SubTex,mainUV);
-						float layDepth = mask.r * _ParallaxDepth;
+						float layDepth = (1.0-mask.r) * _ParallaxDepth;
 						float3 rayPos = input.modelPos;
 						float3 rayDir =  rayPos.xyz - _ObjectSpaceStereoCameraPos;
 						float3 planeNormal = input.modelNormal;
 						float3 planePos = rayPos - planeNormal*layDepth;
 						float intersect = 999;
 						{
-							float i = -dot(planePos - rayPos, planeNormal) / dot(rayDir, planeNormal);
+							float i = dot(planePos - rayPos, planeNormal) / dot(rayDir, planeNormal);
 							if (i < intersect)
 							{
 								intersect = i;
@@ -769,7 +769,7 @@ SubShader
 						parallaxCol = tex2D( _ParallaxTexture, parauv) * _ParallaxColor;
 						parallaxCol.a = lerp(0,parallaxCol.a,step(_AlphaCut,parallaxCol.a));
 						}
-						parallaxMask = (1-mask.a) * step( LIMIT_ZERO, _ParallaxDepth);
+						parallaxMask = (1.0-mask.a) * step( LIMIT_ZERO, _ParallaxDepth);
 					}
 
 					if(parallaxMask>0.5)

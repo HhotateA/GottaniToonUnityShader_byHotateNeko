@@ -83,7 +83,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParallaxTexture:
-        m_Texture: {fileID: 2800000, guid: b3605d27e95341941bb8505fdb14f2ec, type: 3}
+        m_Texture: {fileID: 2800000, guid: 93f4c48fa22e7004189dee092b1a1059, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _PositionMemory:
@@ -209,7 +209,7 @@ Material:
     - _OverrideV: 0.5
     - _ParallaxAdd: 0
     - _ParallaxBlend: 1
-    - _ParallaxDepth: 5
+    - _ParallaxDepth: 12.7
     - _ParallaxMul: 0
     - _ParticleColorFactor: 0
     - _ParticleFactor: 0
