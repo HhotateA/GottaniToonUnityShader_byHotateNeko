@@ -761,7 +761,7 @@ SubShader
 						float3 cc = normalize(float3(0,1,0));
 						float3 uvx = length(cross(planeNormal,cc))<0.00001 ? float3(1,0,0) : normalize(cross(planeNormal,cc));
 						float3 uvy = normalize(cross(planeNormal,uvx));
-						float2 parauv = float2( dot(uvx,pos), dot(uvy,pos));
+						float2 parauv = float2( dot(uvx,pos), -dot(uvy,pos));
 						parauv = TRANSFORM_TEX(parauv,_ParallaxTexture);
 						parauv += _ParallaxScroll.xy *floor(_Time.y/max(LIMIT_ZERO,_ParallaxScroll.w))*max(LIMIT_ZERO,_ParallaxScroll.w);
 						parauv.x += feel_good_func(feel_good_func(_Time.y*_ParallaxScroll.z));

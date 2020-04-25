@@ -209,7 +209,7 @@ Material:
     - _OverrideV: 0.5
     - _ParallaxAdd: 0
     - _ParallaxBlend: 1
-    - _ParallaxDepth: 12.7
+    - _ParallaxDepth: 5
     - _ParallaxMul: 0
     - _ParticleColorFactor: 0
     - _ParticleFactor: 0
