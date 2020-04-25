@@ -6,7 +6,7 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: Parallax2
+  m_Name: Parallax3
   m_Shader: {fileID: 4800000, guid: 2459acaaa1652c94a9693d92b9243c33, type: 3}
   m_ShaderKeywords: _FURSATURATE_ON
   m_LightmapFlags: 4
@@ -59,7 +59,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: bd1003b1a4f90aa429799e540e164200, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 0.3, y: 0.3}
         m_Offset: {x: 0, y: 0}
     - _MatCap:
@@ -79,7 +79,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParallaxMask:
-        m_Texture: {fileID: 2800000, guid: bd1003b1a4f90aa429799e540e164200, type: 3}
+        m_Texture: {fileID: 8600000, guid: ebaa9db986e44144f9db801efc957f01, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParallaxTexture:
@@ -131,7 +131,7 @@ Material:
     - _AddMirrorCulling: 0
     - _Alpha2Grab: 0
     - _Alpha2Parallax: 0
-    - _AlphaCut: 0.465
+    - _AlphaCut: 0.135
     - _BaseCameraCulling: 0
     - _BaseMirrorCulling: 0
     - _BillBoard: 0
